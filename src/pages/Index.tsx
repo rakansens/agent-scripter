@@ -67,6 +67,7 @@ const Index = () => {
     setGenerationSteps([
       {
         id: "1",
+        name: "プロジェクト構造の分析",
         agentRole: "architect",
         status: "in-progress",
         message: "要件を分析し、プロジェクト構造を設計中",
@@ -74,6 +75,7 @@ const Index = () => {
       },
       {
         id: "2",
+        name: "コンポーネント生成",
         agentRole: "component-generator",
         status: "pending",
         message: "コンポーネント生成待機中",
@@ -81,6 +83,7 @@ const Index = () => {
       },
       {
         id: "3",
+        name: "スタイリング",
         agentRole: "styling",
         status: "pending",
         message: "スタイリング待機中",
@@ -88,6 +91,7 @@ const Index = () => {
       },
       {
         id: "4",
+        name: "テスト生成",
         agentRole: "testing",
         status: "pending",
         message: "テスト生成待機中",

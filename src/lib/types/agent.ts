@@ -20,7 +20,7 @@ export interface ProjectStructure {
 
 export interface ComponentStructure {
   name: string;
-  type: "component" | "hook" | "utility";
+  type: "component" | "hook" | "utility" | "directory";
   path: string;
   description: string;
   dependencies?: string[];
@@ -29,8 +29,9 @@ export interface ComponentStructure {
 
 export interface GenerationStep {
   id: string;
+  name: string;
   agentRole: AgentRole;
-  status: "pending" | "in-progress" | "completed" | "error";
+  status: "pending" | "in-progress" | "completed" | "error" | "processing";
   message: string;
   timestamp: Date;
 }
