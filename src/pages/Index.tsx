@@ -28,12 +28,11 @@ const Index = () => {
             content: msg.content,
           })),
         },
-        responseType: 'stream',
       });
 
       if (!response.data) throw new Error('No response data');
 
-      const reader = response.data.getReader();
+      const reader = new ReadableStreamDefaultReader(response.data as ReadableStream);
       const decoder = new TextDecoder();
 
       while (true) {
