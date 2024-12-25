@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Folder, FileCode, ChevronRight, ChevronDown } from 'lucide-react';
 import CodeBlock from '../chat/CodeBlock';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ProjectStructureViewProps {
   structure: ProjectStructure;
@@ -16,6 +17,7 @@ const ProjectStructureView: React.FC<ProjectStructureViewProps> = ({
 }) => {
   const [expandedPaths, setExpandedPaths] = React.useState<Set<string>>(new Set());
   const [selectedComponent, setSelectedComponent] = useState<ComponentStructure | null>(null);
+  const { toast } = useToast();
 
   const togglePath = (path: string) => {
     const newPaths = new Set(expandedPaths);
@@ -28,8 +30,17 @@ const ProjectStructureView: React.FC<ProjectStructureViewProps> = ({
   };
 
   const handleComponentSelect = (component: ComponentStructure) => {
+    console.log('Selected component:', component);
     setSelectedComponent(component);
     onSelect?.(component.name);
+
+    if (!component.code) {
+      toast({
+        title: "コードが見つかりません",
+        description: "このファイルにはまだコードが生成されていません。",
+        variant: "destructive"
+      });
+    }
   };
 
   const renderComponent = (component: ComponentStructure, path: string = '') => {

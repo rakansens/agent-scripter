@@ -104,7 +104,8 @@ const Index = () => {
       });
 
       if (!response.data) throw new Error("No response data");
-
+      
+      console.log('Generated project structure:', response.data.structure);
       setProjectStructure(response.data.structure);
       setGenerationProgress(25);
       setCurrentGeneratedCode(response.data.currentCode || "");
@@ -127,6 +128,23 @@ const Index = () => {
       );
 
       if (!componentResponse.data) throw new Error("Component generation failed");
+      console.log('Generated components:', componentResponse.data);
+
+      // Update the project structure with generated code
+      if (componentResponse.data.components) {
+        const updatedStructure = {
+          ...response.data.structure,
+          components: response.data.structure.components.map((component: ComponentStructure) => {
+            const generatedComponent = componentResponse.data.components.find(
+              (gc: any) => gc.path === component.path
+            );
+            return generatedComponent
+              ? { ...component, code: generatedComponent.content, language: 'typescript' }
+              : component;
+          }),
+        };
+        setProjectStructure(updatedStructure);
+      }
 
       setGenerationProgress(100);
       setGenerationSteps((prev) =>
