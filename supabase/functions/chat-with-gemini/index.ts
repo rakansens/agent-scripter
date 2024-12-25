@@ -30,6 +30,9 @@ serve(async (req) => {
         role: msg.role === 'user' ? 'user' : 'model',
         parts: msg.content,
       })),
+      generationConfig: {
+        maxOutputTokens: 2048,
+      },
     });
 
     const result = await chat.sendMessage(messages[messages.length - 1].content, {
@@ -41,10 +44,12 @@ serve(async (req) => {
         try {
           for await (const chunk of result.stream) {
             const text = chunk.text();
-            controller.enqueue(text);
+            const encoder = new TextEncoder();
+            controller.enqueue(encoder.encode(text));
           }
           controller.close();
         } catch (error) {
+          console.error('Streaming error:', error);
           controller.error(error);
         }
       },
