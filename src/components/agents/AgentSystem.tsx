@@ -1,7 +1,6 @@
 import React from 'react';
 import { Agent, ProjectStructure, GenerationStep } from '@/lib/types/agent';
 import AgentCard from './AgentCard';
-import ProjectStructureView from '../project-structure/ProjectStructureView';
 import { Progress } from '@/components/ui/progress';
 
 interface AgentSystemProps {
@@ -13,7 +12,6 @@ interface AgentSystemProps {
 
 const AgentSystem: React.FC<AgentSystemProps> = ({
   agents,
-  currentStructure,
   steps,
   progress
 }) => {
@@ -45,12 +43,6 @@ const AgentSystem: React.FC<AgentSystemProps> = ({
         </div>
         <Progress value={progress} className="w-full" />
       </div>
-
-      {currentStructure && (
-        <div className="mt-6">
-          <ProjectStructureView structure={currentStructure} />
-        </div>
-      )}
 
       <div className="space-y-2">
         {steps.map(step => (
