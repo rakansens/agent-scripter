@@ -1,19 +1,19 @@
 import { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import CodeBlock from "./CodeBlock";
+import TypingCodeBlock from "./TypingCodeBlock";
 import CodeEditor from "./CodeEditor";
 import CodePreview from "./CodePreview";
 import { useState } from "react";
 
 interface MessageItemProps {
   message: Message;
+  isTyping?: boolean;
 }
 
-const MessageItem = ({ message }: MessageItemProps) => {
+const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
   const isUser = message.role === "user";
   const [selectedTab, setSelectedTab] = useState<'code' | 'preview'>('code');
 
-  // Function to detect and extract code blocks
   const renderContent = (content: string) => {
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
     const parts = [];
@@ -21,7 +21,6 @@ const MessageItem = ({ message }: MessageItemProps) => {
     let match;
 
     while ((match = codeBlockRegex.exec(content)) !== null) {
-      // Add text before code block
       if (match.index > lastIndex) {
         parts.push(
           <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap">
@@ -30,7 +29,6 @@ const MessageItem = ({ message }: MessageItemProps) => {
         );
       }
 
-      // Add code block with tabs for code and preview
       const language = match[1] || 'typescript';
       const code = match[2].trim();
       parts.push(
@@ -61,7 +59,11 @@ const MessageItem = ({ message }: MessageItemProps) => {
           </div>
           <div className="border border-gray-700 rounded-lg overflow-hidden">
             {selectedTab === 'code' ? (
-              <CodeEditor code={code} language={language} />
+              isTyping ? (
+                <TypingCodeBlock code={code} language={language} />
+              ) : (
+                <CodeEditor code={code} language={language} />
+              )
             ) : (
               <CodePreview code={code} />
             )}
@@ -72,7 +74,6 @@ const MessageItem = ({ message }: MessageItemProps) => {
       lastIndex = match.index + match[0].length;
     }
 
-    // Add remaining text after last code block
     if (lastIndex < content.length) {
       parts.push(
         <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap">
