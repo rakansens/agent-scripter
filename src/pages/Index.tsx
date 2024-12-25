@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import CodeGenerationProgress from "@/components/chat/CodeGenerationProgress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ProjectStructureView from "@/components/project-structure/ProjectStructureView";
 
 const INITIAL_AGENTS: Agent[] = [
   {
@@ -188,6 +189,15 @@ const Index = () => {
                 tech={["React", "TypeScript", "Tailwind CSS"]}
               />
             </Card>
+            {projectStructure && (
+              <Card className="p-4">
+                <ScrollArea className="h-[400px]">
+                  <ProjectStructureView
+                    structure={projectStructure}
+                  />
+                </ScrollArea>
+              </Card>
+            )}
           </div>
         </div>
       </div>
