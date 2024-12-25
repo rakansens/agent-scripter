@@ -4,8 +4,3 @@ export interface Message {
   role: "user" | "assistant";
   timestamp: Date;
 }
-
-export interface ChatState {
-  messages: Message[];
-  isTyping: boolean;
-}

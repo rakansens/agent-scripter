@@ -55,7 +55,6 @@ const Index = () => {
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
     
-    // Initialize generation steps
     setGenerationSteps([
       {
         id: "1",
@@ -94,10 +93,8 @@ const Index = () => {
 
       if (!response.data) throw new Error("No response data");
 
-      // Update project structure
       setProjectStructure(response.data.structure);
       
-      // Update generation steps
       setGenerationSteps((prev) =>
         prev.map((step) =>
           step.agentRole === "architect"
@@ -106,7 +103,6 @@ const Index = () => {
         )
       );
 
-      // Start component generation
       const componentResponse = await supabase.functions.invoke(
         "generate-components",
         {
@@ -116,7 +112,6 @@ const Index = () => {
 
       if (!componentResponse.data) throw new Error("Component generation failed");
 
-      // Update progress and steps
       setGenerationProgress(100);
       setGenerationSteps((prev) =>
         prev.map((step) => ({ ...step, status: "completed" }))
@@ -149,24 +144,20 @@ const Index = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="flex-1 flex flex-col">
-        <div className="flex-1 overflow-auto">
-          <AgentSystem
-            agents={INITIAL_AGENTS}
-            currentStructure={projectStructure || undefined}
-            steps={generationSteps}
-            progress={generationProgress}
-          />
-        </div>
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-          <ChatContainer
-            messages={messages}
-            isTyping={isTyping}
-            onSendMessage={handleSendMessage}
-            streamedMessage={currentStreamedMessage}
-          />
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <AgentSystem
+          agents={INITIAL_AGENTS}
+          currentStructure={projectStructure || undefined}
+          steps={generationSteps}
+          progress={generationProgress}
+        />
+        <ChatContainer
+          messages={messages}
+          isTyping={isTyping}
+          onSendMessage={handleSendMessage}
+          streamedMessage={currentStreamedMessage}
+        />
       </div>
     </div>
   );
