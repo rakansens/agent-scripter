@@ -32,20 +32,9 @@ const Index = () => {
 
       if (!response.data) throw new Error('No response data');
 
-      const reader = new ReadableStreamDefaultReader(response.data as ReadableStream);
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value);
-        setCurrentStreamedMessage(prev => prev + chunk);
-      }
-
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: currentStreamedMessage,
+        content: response.data,
         role: "assistant",
         timestamp: new Date(),
       };

@@ -35,34 +35,17 @@ serve(async (req) => {
       },
     });
 
-    const result = await chat.sendMessage(messages[messages.length - 1].content, {
-      stream: true,
-    });
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            const encoder = new TextEncoder();
-            controller.enqueue(encoder.encode(text));
-          }
-          controller.close();
-        } catch (error) {
-          console.error('Streaming error:', error);
-          controller.error(error);
-        }
-      },
-    });
-
-    return new Response(stream, {
+    const result = await chat.sendMessage(messages[messages.length - 1].content);
+    const response = await result.response;
+    const text = response.text();
+    
+    return new Response(text, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        'Content-Type': 'text/plain',
       },
     });
+
   } catch (error) {
     console.error('Error in chat-with-gemini function:', error);
     return new Response(JSON.stringify({ error: error.message }), {
