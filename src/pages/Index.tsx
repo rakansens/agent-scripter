@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import CodeGenerationProgress from "@/components/chat/CodeGenerationProgress";
 import GeneratedArtifacts from "@/components/chat/GeneratedArtifacts";
 import { useToast } from "@/components/ui/use-toast";
+import FileExplorer, { FileNode } from "@/components/file-explorer/FileExplorer";
+import YAMLViewer from "@/components/file-explorer/YAMLViewer";
 
 interface Artifact {
   name: string;
@@ -28,6 +30,7 @@ const Index = () => {
   const [generationStatus, setGenerationStatus] = useState("");
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
+  const [projectStructure, setProjectStructure] = useState<FileNode | null>(null);
   const { toast } = useToast();
 
   const updateGenerationStep = (stepName: string, status: GenerationStep['status'], message?: string) => {
@@ -57,6 +60,7 @@ const Index = () => {
     setGenerationStatus("Initializing...");
     setGenerationSteps([
       { name: 'Analyzing request', status: 'processing' },
+      { name: 'Generating YAML structure', status: 'pending' },
       { name: 'Setting up environment', status: 'pending' },
       { name: 'Generating code', status: 'pending' },
       { name: 'Optimizing and formatting', status: 'pending' }
@@ -113,6 +117,19 @@ const Index = () => {
 
       setArtifacts(prev => [...prev, ...newArtifacts]);
       updateGenerationStep('Optimizing and formatting', 'completed');
+
+      // Convert artifacts to FileNode structure
+      const rootNode: FileNode = {
+        name: 'root',
+        type: 'directory',
+        children: newArtifacts.map(artifact => ({
+          name: artifact.name,
+          type: 'file',
+          content: artifact.content,
+          language: artifact.name.split('.').pop() || 'typescript'
+        }))
+      };
+      setProjectStructure(rootNode);
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -182,12 +199,29 @@ const Index = () => {
     <div className="flex h-screen bg-gray-900">
       <div className="flex-1 flex">
         <div className="w-64 p-4 border-r border-gray-700">
-          <GeneratedArtifacts 
-            artifacts={artifacts}
-            onSelect={handleArtifactSelect}
-            onEdit={handleArtifactEdit}
-            onDelete={handleArtifactDelete}
-          />
+          {projectStructure && (
+            <FileExplorer
+              structure={projectStructure}
+              onFileSelect={(file) => {
+                if (file.content) {
+                  const artifact: Artifact = {
+                    name: file.name,
+                    type: 'file',
+                    content: file.content
+                  };
+                  handleArtifactSelect(artifact);
+                }
+              }}
+            />
+          )}
+          <div className="mt-4">
+            <GeneratedArtifacts 
+              artifacts={artifacts}
+              onSelect={handleArtifactSelect}
+              onEdit={handleArtifactEdit}
+              onDelete={handleArtifactDelete}
+            />
+          </div>
         </div>
         <div className="flex-1">
           <ChatContainer
