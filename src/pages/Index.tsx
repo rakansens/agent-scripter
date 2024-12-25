@@ -1,49 +1,44 @@
 import { useState } from "react";
-import ChatContainer from "@/components/chat/ChatContainer";
-import { Message } from "@/lib/types";
-import { supabase } from "@/integrations/supabase/client";
-import CodeGenerationProgress from "@/components/chat/CodeGenerationProgress";
-import GeneratedArtifacts from "@/components/chat/GeneratedArtifacts";
+import { Agent, ProjectStructure, GenerationStep } from "@/lib/types/agent";
 import { useToast } from "@/components/ui/use-toast";
-import FileExplorer, { FileNode } from "@/components/file-explorer/FileExplorer";
-import YAMLViewer from "@/components/file-explorer/YAMLViewer";
+import AgentSystem from "@/components/agents/AgentSystem";
+import { supabase } from "@/integrations/supabase/client";
 
-interface Artifact {
-  name: string;
-  type: 'file' | 'component';
-  content: string;
-}
-
-interface GenerationStep {
-  name: string;
-  status: 'pending' | 'processing' | 'completed' | 'error';
-  message?: string;
-}
-
-const TECH_STACK = ['React', 'TypeScript', 'Tailwind CSS', 'shadcn/ui'];
+const INITIAL_AGENTS: Agent[] = [
+  {
+    role: "architect",
+    name: "Architect Agent",
+    description: "Designs the overall project structure and component hierarchy",
+    capabilities: ["Project planning", "Directory structure", "Dependency management"],
+  },
+  {
+    role: "component-generator",
+    name: "Component Generator",
+    description: "Generates React components and their implementations",
+    capabilities: ["React", "TypeScript", "Component patterns"],
+  },
+  {
+    role: "styling",
+    name: "Styling Agent",
+    description: "Handles component styling and visual design",
+    capabilities: ["TailwindCSS", "Responsive design", "Accessibility"],
+  },
+  {
+    role: "testing",
+    name: "Testing Agent",
+    description: "Creates test cases and ensures code quality",
+    capabilities: ["Unit testing", "Integration testing", "Test coverage"],
+  },
+];
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [currentStreamedMessage, setCurrentStreamedMessage] = useState("");
   const [generationProgress, setGenerationProgress] = useState(0);
-  const [generationStatus, setGenerationStatus] = useState("");
-  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const [projectStructure, setProjectStructure] = useState<ProjectStructure | null>(null);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
-  const [projectStructure, setProjectStructure] = useState<FileNode | null>(null);
   const { toast } = useToast();
-
-  const updateGenerationStep = (stepName: string, status: GenerationStep['status'], message?: string) => {
-    setGenerationSteps(prev => {
-      const stepIndex = prev.findIndex(step => step.name === stepName);
-      if (stepIndex === -1) {
-        return [...prev, { name: stepName, status, message }];
-      }
-      const newSteps = [...prev];
-      newSteps[stepIndex] = { ...newSteps[stepIndex], status, message };
-      return newSteps;
-    });
-  };
 
   const handleSendMessage = async (content: string) => {
     const newMessage: Message = {
@@ -57,173 +52,112 @@ const Index = () => {
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
-    setGenerationStatus("Initializing...");
+    
+    // Initialize generation steps
     setGenerationSteps([
-      { name: 'Analyzing request', status: 'processing' },
-      { name: 'Generating YAML structure', status: 'pending' },
-      { name: 'Setting up environment', status: 'pending' },
-      { name: 'Generating code', status: 'pending' },
-      { name: 'Optimizing and formatting', status: 'pending' }
+      {
+        id: "1",
+        agentRole: "architect",
+        status: "in-progress",
+        message: "Analyzing requirements and designing project structure",
+        timestamp: new Date(),
+      },
+      {
+        id: "2",
+        agentRole: "component-generator",
+        status: "pending",
+        message: "Waiting to generate components",
+        timestamp: new Date(),
+      },
+      {
+        id: "3",
+        agentRole: "styling",
+        status: "pending",
+        message: "Waiting to apply styling",
+        timestamp: new Date(),
+      },
+      {
+        id: "4",
+        agentRole: "testing",
+        status: "pending",
+        message: "Waiting to generate tests",
+        timestamp: new Date(),
+      },
     ]);
 
     try {
-      updateGenerationStep('Analyzing request', 'completed');
-      updateGenerationStep('Setting up environment', 'processing');
-      
-      const progressInterval = setInterval(() => {
-        setGenerationProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 500);
-
-      updateGenerationStep('Setting up environment', 'completed');
-      updateGenerationStep('Generating code', 'processing');
-
-      const response = await supabase.functions.invoke('chat-with-gemini', {
-        body: {
-          messages: [...messages, newMessage].map(msg => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        },
+      const response = await supabase.functions.invoke("generate-project-structure", {
+        body: { prompt: content },
       });
 
-      clearInterval(progressInterval);
+      if (!response.data) throw new Error("No response data");
+
+      // Update project structure
+      setProjectStructure(response.data.structure);
       
-      if (!response.data) throw new Error('No response data');
-
-      updateGenerationStep('Generating code', 'completed');
-      updateGenerationStep('Optimizing and formatting', 'processing');
-
-      const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-      let match;
-      const newArtifacts: Artifact[] = [];
-      
-      while ((match = codeBlockRegex.exec(response.data)) !== null) {
-        const fileName = match[1]?.includes('file=') 
-          ? match[1].split('file=')[1]
-          : `Generated_${Date.now()}.tsx`;
-        
-        newArtifacts.push({
-          name: fileName,
-          type: fileName.includes('Component') ? 'component' : 'file',
-          content: match[2].trim()
-        });
-      }
-
-      setArtifacts(prev => [...prev, ...newArtifacts]);
-      updateGenerationStep('Optimizing and formatting', 'completed');
-
-      // Convert artifacts to FileNode structure
-      const rootNode: FileNode = {
-        name: 'root',
-        type: 'directory',
-        children: newArtifacts.map(artifact => ({
-          name: artifact.name,
-          type: 'file',
-          content: artifact.content,
-          language: artifact.name.split('.').pop() || 'typescript'
-        }))
-      };
-      setProjectStructure(rootNode);
-
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response.data,
-        role: "assistant",
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-      setGenerationProgress(100);
-      setGenerationStatus("Generation completed successfully!");
-
-    } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "申し訳ありません。エラーが発生しました。",
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-      setGenerationSteps(prev => 
-        prev.map(step => 
-          step.status === 'processing' 
-            ? { ...step, status: 'error' }
+      // Update generation steps
+      setGenerationSteps((prev) =>
+        prev.map((step) =>
+          step.agentRole === "architect"
+            ? { ...step, status: "completed", message: "Project structure generated" }
             : step
         )
       );
+
+      // Start component generation
+      const componentResponse = await supabase.functions.invoke(
+        "generate-components",
+        {
+          body: { structure: response.data.structure },
+        }
+      );
+
+      if (!componentResponse.data) throw new Error("Component generation failed");
+
+      // Update progress and steps
+      setGenerationProgress(100);
+      setGenerationSteps((prev) =>
+        prev.map((step) => ({ ...step, status: "completed" }))
+      );
+
+      toast({
+        title: "Generation completed",
+        description: "All components have been generated successfully.",
+      });
+
+    } catch (error) {
+      console.error("Error in project generation:", error);
       toast({
         variant: "destructive",
         title: "エラーが発生しました",
-        description: "コード生成中にエラーが発生しました。もう一度お試しください。",
+        description: "プロジェクト生成中にエラーが発生しました。",
       });
+      
+      setGenerationSteps((prev) =>
+        prev.map((step) =>
+          step.status === "in-progress"
+            ? { ...step, status: "error", message: "Generation failed" }
+            : step
+        )
+      );
     } finally {
       setIsTyping(false);
       setCurrentStreamedMessage("");
     }
   };
 
-  const handleArtifactSelect = (artifact: Artifact) => {
-    console.log('Selected artifact:', artifact);
-  };
-
-  const handleArtifactEdit = (artifact: Artifact, newContent: string) => {
-    setArtifacts(prev => 
-      prev.map(a => 
-        a.name === artifact.name 
-          ? { ...a, content: newContent }
-          : a
-      )
-    );
-    toast({
-      title: "変更を保存しました",
-      description: `${artifact.name} の変更が保存されました。`,
-    });
-  };
-
-  const handleArtifactDelete = (artifact: Artifact) => {
-    setArtifacts(prev => prev.filter(a => a.name !== artifact.name));
-    toast({
-      title: "アーティファクトを削除しました",
-      description: `${artifact.name} を削除しました。`,
-    });
-  };
-
   return (
-    <div className="flex h-screen bg-gray-900">
-      <div className="flex-1 flex">
-        <div className="w-64 p-4 border-r border-gray-700">
-          {projectStructure && (
-            <FileExplorer
-              structure={projectStructure}
-              onFileSelect={(file) => {
-                if (file.content) {
-                  const artifact: Artifact = {
-                    name: file.name,
-                    type: 'file',
-                    content: file.content
-                  };
-                  handleArtifactSelect(artifact);
-                }
-              }}
-            />
-          )}
-          <div className="mt-4">
-            <GeneratedArtifacts 
-              artifacts={artifacts}
-              onSelect={handleArtifactSelect}
-              onEdit={handleArtifactEdit}
-              onDelete={handleArtifactDelete}
-            />
-          </div>
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <AgentSystem
+            agents={INITIAL_AGENTS}
+            currentStructure={projectStructure || undefined}
+            steps={generationSteps}
+            progress={generationProgress}
+          />
         </div>
-        <div className="flex-1">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-800">
           <ChatContainer
             messages={messages}
             isTyping={isTyping}
@@ -232,16 +166,6 @@ const Index = () => {
           />
         </div>
       </div>
-      {generationProgress > 0 && (
-        <div className="fixed bottom-4 right-4 w-80">
-          <CodeGenerationProgress
-            progress={generationProgress}
-            status={generationStatus}
-            tech={TECH_STACK}
-            steps={generationSteps}
-          />
-        </div>
-      )}
     </div>
   );
 };
