@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Agent, ProjectStructure, GenerationStep } from "@/lib/types/agent";
+import { Agent, ProjectStructure, GenerationStep, ComponentStructure } from "@/lib/types/agent";
 import { Message } from "@/lib/types";
 import { useToast } from "@/components/ui/use-toast";
 import AgentSystem from "@/components/agents/AgentSystem";
@@ -10,7 +10,6 @@ import CodeGenerationProgress from "@/components/chat/CodeGenerationProgress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ProjectStructureView from "@/components/project-structure/ProjectStructureView";
 import CodeGenerationVisualizer from "@/components/code-generation/CodeGenerationVisualizer";
-import { FileNode } from "@/components/file-explorer/FileExplorer";
 
 const INITIAL_AGENTS: Agent[] = [
   {
