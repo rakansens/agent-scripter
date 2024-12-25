@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ProjectStructure, ComponentStructure } from '@/lib/types/agent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Folder, FileCode, ChevronRight, ChevronDown } from 'lucide-react';
+import CodeBlock from '../chat/CodeBlock';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ProjectStructureViewProps {
   structure: ProjectStructure;
@@ -13,6 +15,7 @@ const ProjectStructureView: React.FC<ProjectStructureViewProps> = ({
   onSelect
 }) => {
   const [expandedPaths, setExpandedPaths] = React.useState<Set<string>>(new Set());
+  const [selectedComponent, setSelectedComponent] = useState<ComponentStructure | null>(null);
 
   const togglePath = (path: string) => {
     const newPaths = new Set(expandedPaths);
@@ -24,16 +27,24 @@ const ProjectStructureView: React.FC<ProjectStructureViewProps> = ({
     setExpandedPaths(newPaths);
   };
 
+  const handleComponentSelect = (component: ComponentStructure) => {
+    setSelectedComponent(component);
+    onSelect?.(component.name);
+  };
+
   const renderComponent = (component: ComponentStructure, path: string = '') => {
     const currentPath = `${path}/${component.name}`;
     const isExpanded = expandedPaths.has(currentPath);
     const hasChildren = component.children && component.children.length > 0;
+    const isSelected = selectedComponent?.name === component.name;
 
     return (
       <div key={currentPath} className="group">
         <button
-          onClick={() => hasChildren ? togglePath(currentPath) : onSelect?.(currentPath)}
-          className="flex items-center w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md text-sm group"
+          onClick={() => hasChildren ? togglePath(currentPath) : handleComponentSelect(component)}
+          className={`flex items-center w-full px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md text-sm group ${
+            isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+          }`}
         >
           <span className="mr-1.5 text-gray-500">
             {hasChildren ? (
@@ -69,6 +80,17 @@ const ProjectStructureView: React.FC<ProjectStructureViewProps> = ({
         <div className="space-y-1">
           {structure.components.map(component => renderComponent(component))}
         </div>
+        {selectedComponent && selectedComponent.code && (
+          <div className="mt-4 border-t pt-4 dark:border-gray-700">
+            <h3 className="text-sm font-medium mb-2">{selectedComponent.name}</h3>
+            <ScrollArea className="h-[300px]">
+              <CodeBlock 
+                code={selectedComponent.code} 
+                language={selectedComponent.language || 'typescript'} 
+              />
+            </ScrollArea>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
