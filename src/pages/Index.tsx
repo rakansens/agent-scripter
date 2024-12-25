@@ -5,6 +5,8 @@ import { useToast } from "@/components/ui/use-toast";
 import AgentSystem from "@/components/agents/AgentSystem";
 import ChatContainer from "@/components/chat/ChatContainer";
 import { supabase } from "@/integrations/supabase/client";
+import GeneratedArtifacts from "@/components/chat/GeneratedArtifacts";
+import { Card } from "@/components/ui/card";
 
 const INITIAL_AGENTS: Agent[] = [
   {
@@ -40,6 +42,7 @@ const Index = () => {
   const [generationProgress, setGenerationProgress] = useState(0);
   const [projectStructure, setProjectStructure] = useState<ProjectStructure | null>(null);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
+  const [generatedFiles, setGeneratedFiles] = useState<Array<{ name: string; type: 'file' | 'component'; content: string; }>>([]);
   const { toast } = useToast();
 
   const handleSendMessage = async (content: string) => {
@@ -112,14 +115,25 @@ const Index = () => {
 
       if (!componentResponse.data) throw new Error("Component generation failed");
 
+      // Update generated files
+      if (componentResponse.data.components) {
+        setGeneratedFiles(
+          componentResponse.data.components.map((comp: any) => ({
+            name: comp.path.split('/').pop() || '',
+            type: 'component',
+            content: comp.content,
+          }))
+        );
+      }
+
       setGenerationProgress(100);
       setGenerationSteps((prev) =>
         prev.map((step) => ({ ...step, status: "completed" }))
       );
 
       toast({
-        title: "Generation completed",
-        description: "All components have been generated successfully.",
+        title: "生成完了",
+        description: "全てのコンポーネントが正常に生成されました。",
       });
 
     } catch (error) {
@@ -143,21 +157,39 @@ const Index = () => {
     }
   };
 
+  const handleFileSelect = (file: { name: string; type: string; content: string }) => {
+    console.log("Selected file:", file);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div className="max-w-7xl mx-auto space-y-8">
-        <AgentSystem
-          agents={INITIAL_AGENTS}
-          currentStructure={projectStructure || undefined}
-          steps={generationSteps}
-          progress={generationProgress}
-        />
-        <ChatContainer
-          messages={messages}
-          isTyping={isTyping}
-          onSendMessage={handleSendMessage}
-          streamedMessage={currentStreamedMessage}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <AgentSystem
+              agents={INITIAL_AGENTS}
+              currentStructure={projectStructure || undefined}
+              steps={generationSteps}
+              progress={generationProgress}
+            />
+            <div className="mt-8">
+              <ChatContainer
+                messages={messages}
+                isTyping={isTyping}
+                onSendMessage={handleSendMessage}
+                streamedMessage={currentStreamedMessage}
+              />
+            </div>
+          </div>
+          <div className="lg:col-span-1">
+            <Card className="p-4">
+              <GeneratedArtifacts
+                artifacts={generatedFiles}
+                onSelect={handleFileSelect}
+              />
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
