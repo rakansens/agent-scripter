@@ -5,11 +5,8 @@ import { useToast } from "@/components/ui/use-toast";
 import AgentSystem from "@/components/agents/AgentSystem";
 import ChatContainer from "@/components/chat/ChatContainer";
 import { supabase } from "@/integrations/supabase/client";
-import GeneratedArtifacts from "@/components/chat/GeneratedArtifacts";
 import { Card } from "@/components/ui/card";
-import CodePreview from "@/components/chat/CodePreview";
 import CodeGenerationProgress from "@/components/chat/CodeGenerationProgress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const INITIAL_AGENTS: Agent[] = [
@@ -46,8 +43,6 @@ const Index = () => {
   const [generationProgress, setGenerationProgress] = useState(0);
   const [projectStructure, setProjectStructure] = useState<ProjectStructure | null>(null);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
-  const [generatedFiles, setGeneratedFiles] = useState<Array<{ name: string; type: 'file' | 'component'; content: string; }>>([]);
-  const [selectedFile, setSelectedFile] = useState<{ name: string; type: string; content: string; } | null>(null);
   const { toast } = useToast();
 
   const handleSendMessage = async (content: string) => {
@@ -62,7 +57,6 @@ const Index = () => {
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
-    setSelectedFile(null);
     
     setGenerationSteps([
       {
@@ -128,22 +122,6 @@ const Index = () => {
 
       if (!componentResponse.data) throw new Error("Component generation failed");
 
-      setGenerationProgress(50);
-      
-      // Update generated files with real-time progress
-      if (componentResponse.data.components) {
-        const newFiles = componentResponse.data.components.map((comp: any) => ({
-          name: comp.path.split('/').pop() || '',
-          type: 'component',
-          content: comp.content,
-        }));
-        
-        setGeneratedFiles(newFiles);
-        if (newFiles.length > 0) {
-          setSelectedFile(newFiles[0]);
-        }
-      }
-
       setGenerationProgress(100);
       setGenerationSteps((prev) =>
         prev.map((step) => ({ ...step, status: "completed" }))
@@ -173,10 +151,6 @@ const Index = () => {
       setIsTyping(false);
       setCurrentStreamedMessage("");
     }
-  };
-
-  const handleFileSelect = (file: { name: string; type: string; content: string }) => {
-    setSelectedFile(file);
   };
 
   return (
@@ -213,37 +187,6 @@ const Index = () => {
                 steps={generationSteps}
                 tech={["React", "TypeScript", "Tailwind CSS"]}
               />
-            </Card>
-            
-            <Card className="p-4">
-              <Tabs defaultValue="files" className="w-full">
-                <TabsList className="w-full">
-                  <TabsTrigger value="files" className="flex-1">ファイル一覧</TabsTrigger>
-                  <TabsTrigger value="preview" className="flex-1">プレビュー</TabsTrigger>
-                </TabsList>
-                <TabsContent value="files">
-                  <ScrollArea className="h-[400px]">
-                    <GeneratedArtifacts
-                      artifacts={generatedFiles}
-                      onSelect={handleFileSelect}
-                    />
-                  </ScrollArea>
-                </TabsContent>
-                <TabsContent value="preview">
-                  <ScrollArea className="h-[400px]">
-                    {selectedFile ? (
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">{selectedFile.name}</h3>
-                        <CodePreview code={selectedFile.content} />
-                      </div>
-                    ) : (
-                      <div className="text-center text-gray-500 py-4">
-                        ファイルを選択してください
-                      </div>
-                    )}
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
             </Card>
           </div>
         </div>
