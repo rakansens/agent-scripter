@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [currentStreamedMessage, setCurrentStreamedMessage] = useState("");
 
   const handleSendMessage = async (content: string) => {
     const newMessage: Message = {
@@ -17,27 +18,40 @@ const Index = () => {
 
     setMessages((prev) => [...prev, newMessage]);
     setIsTyping(true);
+    setCurrentStreamedMessage("");
 
     try {
-      const { data, error } = await supabase.functions.invoke('chat-with-gemini', {
+      const response = await supabase.functions.invoke('chat-with-gemini', {
         body: {
           messages: [...messages, newMessage].map(msg => ({
             role: msg.role,
             content: msg.content,
           })),
         },
+        responseType: 'stream',
       });
 
-      if (error) throw error;
+      if (!response.data) throw new Error('No response data');
 
-      const response: Message = {
+      const reader = response.data.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        setCurrentStreamedMessage(prev => prev + chunk);
+      }
+
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response,
+        content: currentStreamedMessage,
         role: "assistant",
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, response]);
+      setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error calling Gemini API:', error);
       const errorMessage: Message = {
@@ -49,6 +63,7 @@ const Index = () => {
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
+      setCurrentStreamedMessage("");
     }
   };
 
@@ -58,6 +73,7 @@ const Index = () => {
         messages={messages}
         isTyping={isTyping}
         onSendMessage={handleSendMessage}
+        streamedMessage={currentStreamedMessage}
       />
     </div>
   );

@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -32,14 +31,31 @@ serve(async (req) => {
       })),
     });
 
-    const result = await chat.sendMessage(messages[messages.length - 1].content);
-    const response = await result.response;
-    const text = response.text();
+    const result = await chat.sendMessage(messages[messages.length - 1].content, {
+      stream: true,
+    });
 
-    console.log('Generated response:', text);
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            controller.enqueue(text);
+          }
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
 
-    return new Response(JSON.stringify({ response: text }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(stream, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     });
   } catch (error) {
     console.error('Error in chat-with-gemini function:', error);
