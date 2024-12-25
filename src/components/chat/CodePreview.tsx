@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface CodePreviewProps {
   code: string;
@@ -6,6 +6,7 @@ interface CodePreviewProps {
 
 const CodePreview = ({ code }: CodePreviewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (iframeRef.current) {
@@ -32,16 +33,24 @@ const CodePreview = ({ code }: CodePreviewProps) => {
                   border-radius: 4px;
                   margin: 8px 0;
                 }
+                .preview-container {
+                  padding: 1rem;
+                  border-radius: 0.5rem;
+                  background: white;
+                }
               </style>
             </head>
             <body>
-              ${code}
+              <div class="preview-container">
+                ${code}
+              </div>
               <script>
                 window.onerror = function(msg, url, line) {
                   const errorDiv = document.createElement('div');
                   errorDiv.className = 'error';
                   errorDiv.textContent = 'Error: ' + msg + ' (line ' + line + ')';
                   document.body.appendChild(errorDiv);
+                  window.parent.postMessage({ type: 'error', message: msg }, '*');
                   return false;
                 };
               </script>
@@ -52,17 +61,32 @@ const CodePreview = ({ code }: CodePreviewProps) => {
         const url = URL.createObjectURL(blob);
         iframe.src = url;
 
+        const handleMessage = (event: MessageEvent) => {
+          if (event.data.type === 'error') {
+            setError(event.data.message);
+          }
+        };
+
+        window.addEventListener('message', handleMessage);
+
         return () => {
           URL.revokeObjectURL(url);
+          window.removeEventListener('message', handleMessage);
         };
       } catch (error) {
         console.error('Error in CodePreview:', error);
+        setError(error instanceof Error ? error.message : 'An error occurred');
       }
     }
   }, [code]);
 
   return (
-    <div className="w-full h-full min-h-[200px] bg-white rounded-lg overflow-hidden">
+    <div className="relative w-full h-full min-h-[200px] bg-white rounded-lg overflow-hidden">
+      {error && (
+        <div className="absolute top-0 left-0 right-0 bg-red-100 text-red-600 p-2 text-sm">
+          {error}
+        </div>
+      )}
       <iframe
         ref={iframeRef}
         className="w-full h-full border-none"
