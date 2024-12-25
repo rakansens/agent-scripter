@@ -27,11 +27,13 @@ export interface ComponentStructure {
   children?: ComponentStructure[];
 }
 
+export type GenerationStepStatus = "pending" | "processing" | "completed" | "error";
+
 export interface GenerationStep {
   id: string;
   name: string;
   agentRole: AgentRole;
-  status: "pending" | "in-progress" | "completed" | "error" | "processing";
+  status: GenerationStepStatus | "in-progress";
   message: string;
   timestamp: Date;
 }
