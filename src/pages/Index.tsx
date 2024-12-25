@@ -11,6 +11,8 @@ interface Artifact {
   content: string;
 }
 
+const TECH_STACK = ['React', 'TypeScript', 'Tailwind CSS', 'shadcn/ui'];
+
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
@@ -31,7 +33,7 @@ const Index = () => {
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
-    setGenerationStatus("Initializing...");
+    setGenerationStatus("Initializing with React + TypeScript...");
 
     try {
       const progressInterval = setInterval(() => {
@@ -42,7 +44,7 @@ const Index = () => {
           }
           return prev + 10;
         });
-        setGenerationStatus("Generating code...");
+        setGenerationStatus("Generating code with Tailwind CSS and shadcn/ui...");
       }, 500);
 
       const response = await supabase.functions.invoke('chat-with-gemini', {
@@ -60,7 +62,6 @@ const Index = () => {
 
       if (!response.data) throw new Error('No response data');
 
-      // Extract code blocks and add them to artifacts
       const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
       let match;
       const newArtifacts: Artifact[] = [];
@@ -107,7 +108,6 @@ const Index = () => {
   };
 
   const handleArtifactSelect = (artifact: Artifact) => {
-    // You can implement preview or editing functionality here
     console.log('Selected artifact:', artifact);
   };
 
@@ -134,6 +134,7 @@ const Index = () => {
           <CodeGenerationProgress
             progress={generationProgress}
             status={generationStatus}
+            tech={TECH_STACK}
           />
         </div>
       )}
