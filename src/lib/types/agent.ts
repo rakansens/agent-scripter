@@ -25,6 +25,8 @@ export interface ComponentStructure {
   description: string;
   dependencies?: string[];
   children?: ComponentStructure[];
+  code?: string;
+  language?: string;
 }
 
 export type GenerationStepStatus = "pending" | "processing" | "completed" | "error";
