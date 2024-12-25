@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProjectStructure } from '@/lib/types/agent';
+import { ProjectStructure, ComponentStructure } from '@/lib/types/agent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Folder, FileCode, ChevronRight, ChevronDown } from 'lucide-react';
 

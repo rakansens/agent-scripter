@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Agent, ProjectStructure, GenerationStep } from "@/lib/types/agent";
+import { Message } from "@/lib/types";
 import { useToast } from "@/components/ui/use-toast";
 import AgentSystem from "@/components/agents/AgentSystem";
+import ChatContainer from "@/components/chat/ChatContainer";
 import { supabase } from "@/integrations/supabase/client";
 
 const INITIAL_AGENTS: Agent[] = [
