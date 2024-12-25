@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/card";
 import CodeGenerationProgress from "@/components/chat/CodeGenerationProgress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ProjectStructureView from "@/components/project-structure/ProjectStructureView";
+import CodeGenerationVisualizer from "@/components/code-generation/CodeGenerationVisualizer";
+import { FileNode } from "@/components/file-explorer/FileExplorer";
 
 const INITIAL_AGENTS: Agent[] = [
   {
@@ -44,6 +46,7 @@ const Index = () => {
   const [generationProgress, setGenerationProgress] = useState(0);
   const [projectStructure, setProjectStructure] = useState<ProjectStructure | null>(null);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
+  const [currentGeneratedCode, setCurrentGeneratedCode] = useState<string>("");
   const { toast } = useToast();
 
   const handleSendMessage = async (content: string) => {
@@ -58,6 +61,7 @@ const Index = () => {
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
+    setCurrentGeneratedCode("");
     
     setGenerationSteps([
       {
@@ -103,6 +107,7 @@ const Index = () => {
 
       setProjectStructure(response.data.structure);
       setGenerationProgress(25);
+      setCurrentGeneratedCode(response.data.currentCode || "");
       
       setGenerationSteps((prev) =>
         prev.map((step) =>
@@ -161,7 +166,6 @@ const Index = () => {
           <div className="lg:col-span-2">
             <AgentSystem
               agents={INITIAL_AGENTS}
-              currentStructure={projectStructure || undefined}
               steps={generationSteps}
               progress={generationProgress}
             />
@@ -189,6 +193,12 @@ const Index = () => {
                 tech={["React", "TypeScript", "Tailwind CSS"]}
               />
             </Card>
+            
+            <CodeGenerationVisualizer 
+              steps={generationSteps}
+              currentCode={currentGeneratedCode}
+            />
+
             {projectStructure && (
               <Card className="p-4">
                 <ScrollArea className="h-[400px]">
