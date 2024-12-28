@@ -6,7 +6,11 @@ import { AgentProvider } from '@/contexts/AgentContext';
 import { MessageProvider } from '@/contexts/MessageContext';
 import { ComponentGenerationProvider } from '@/contexts/ComponentGenerationContext';
 
-const MainLayout = () => {
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <AgentProvider>
       <MessageProvider>
@@ -18,6 +22,7 @@ const MainLayout = () => {
               </div>
               <PreviewSection />
             </div>
+            {children}
           </Layout>
         </ComponentGenerationProvider>
       </MessageProvider>
