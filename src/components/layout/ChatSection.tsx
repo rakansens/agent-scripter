@@ -46,7 +46,7 @@ const ChatSection = () => {
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, progressMessage]);
+      setMessages((prev: Message[]): Message[] => [...prev, progressMessage]);
 
       const response = await supabase.functions.invoke("generate-project-structure", {
         body: { prompt: content },
@@ -65,7 +65,7 @@ const ChatSection = () => {
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, structureMessage]);
+      setMessages((prev: Message[]): Message[] => [...prev, structureMessage]);
 
       // Update generation steps as each agent completes its task
       let progress = 25;
@@ -90,7 +90,7 @@ const ChatSection = () => {
           role: "assistant",
           timestamp: new Date(),
         };
-        setMessages(prev => [...prev, stepMessage]);
+        setMessages((prev: Message[]): Message[] => [...prev, stepMessage]);
       }
 
       // Set all steps to completed
@@ -108,7 +108,7 @@ const ChatSection = () => {
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, completionMessage]);
+      setMessages((prev: Message[]): Message[] => [...prev, completionMessage]);
 
       setGenerationProgress(100);
       toast({
@@ -126,7 +126,7 @@ const ChatSection = () => {
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev: Message[]): Message[] => [...prev, errorMessage]);
 
       toast({
         variant: "destructive",
