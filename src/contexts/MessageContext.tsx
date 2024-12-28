@@ -5,7 +5,7 @@ interface MessageContextType {
   messages: Message[];
   isTyping: boolean;
   currentStreamedMessage: string;
-  setMessages: (messages: Message[]) => void;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   setIsTyping: (isTyping: boolean) => void;
   setCurrentStreamedMessage: (message: string) => void;
 }
