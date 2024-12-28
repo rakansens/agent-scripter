@@ -60,7 +60,7 @@ const ChatSection = () => {
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, filesMessage]);
+      setMessages((prev: Message[]) => [...prev, filesMessage]);
       
       let progress = 25;
       for (let i = 1; i < initialSteps.length; i++) {
