@@ -4,6 +4,7 @@ import TypingCodeBlock from "./TypingCodeBlock";
 import CodeEditor from "./CodeEditor";
 import CodePreview from "./CodePreview";
 import { useState } from "react";
+import { Bot, User } from 'lucide-react';
 
 interface MessageItemProps {
   message: Message;
@@ -19,7 +20,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
       const [intro, filesList] = content.split('\n\n');
       return (
         <>
-          <p className="text-sm mb-2 text-gray-100 dark:text-gray-100">{intro}</p>
+          <p className="text-sm mb-2 text-gray-700 dark:text-gray-300">{intro}</p>
           <div className="space-y-1">
             {filesList.split('\n').map((line, index) => {
               const filePath = line.replace('- ', '');
@@ -27,7 +28,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
                 <button
                   key={index}
                   onClick={() => console.log('Selected file:', filePath)}
-                  className="text-sm text-blue-400 hover:text-blue-300 dark:text-blue-300 dark:hover:text-blue-200 block text-left transition-colors"
+                  className="text-sm text-blue-500 hover:text-blue-400 dark:text-blue-400 dark:hover:text-blue-300 block text-left transition-colors"
                 >
                   {filePath}
                 </button>
@@ -46,7 +47,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
     while ((match = codeBlockRegex.exec(content)) !== null) {
       if (match.index > lastIndex) {
         parts.push(
-          <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-100 dark:text-gray-100">
+          <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">
             {content.slice(lastIndex, match.index)}
           </p>
         );
@@ -66,7 +67,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
                   : "bg-gray-800 text-gray-300 hover:bg-gray-900"
               )}
             >
-              Code
+              コード
             </button>
             <button
               onClick={() => setSelectedTab('preview')}
@@ -77,7 +78,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
                   : "bg-gray-800 text-gray-300 hover:bg-gray-900"
               )}
             >
-              Preview
+              プレビュー
             </button>
           </div>
           <div className="border border-gray-800 rounded-lg overflow-hidden bg-gray-950">
@@ -99,32 +100,50 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
 
     if (lastIndex < content.length) {
       parts.push(
-        <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-100 dark:text-gray-100">
+        <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">
           {content.slice(lastIndex)}
         </p>
       );
     }
 
-    return parts.length > 0 ? parts : <p className="text-sm whitespace-pre-wrap text-gray-100 dark:text-gray-100">{content}</p>;
+    return parts.length > 0 ? parts : (
+      <p className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">{content}</p>
+    );
   };
 
   return (
     <div
       className={cn(
-        "flex animate-fade-in p-4",
+        "flex animate-fade-in p-4 group hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors",
         isUser ? "justify-end" : "justify-start"
       )}
     >
+      {!isUser && (
+        <div className="flex-shrink-0 mr-4">
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <Bot className="w-4 h-4 text-primary" />
+          </div>
+        </div>
+      )}
+      
       <div
         className={cn(
-          "max-w-[80%] rounded-lg px-6 py-4 shadow-md",
+          "max-w-[80%] rounded-lg px-4 py-3",
           isUser
             ? "bg-primary text-primary-foreground"
-            : "bg-gray-800 dark:bg-gray-900 text-gray-100"
+            : "bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800"
         )}
       >
         {renderContent(message.content)}
       </div>
+
+      {isUser && (
+        <div className="flex-shrink-0 ml-4">
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <User className="w-4 h-4 text-primary" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
