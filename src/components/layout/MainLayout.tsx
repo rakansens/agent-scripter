@@ -6,9 +6,13 @@ import AgentSection from './AgentSection';
 import { AgentProvider } from '@/contexts/AgentContext';
 import { MessageProvider } from '@/contexts/MessageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, MessageSquare, Bot } from 'lucide-react';
+import { Eye, FolderTree, Bot } from 'lucide-react';
+import FileExplorer from '../file-explorer/FileExplorer';
+import { useAgent } from '@/contexts/AgentContext';
 
 const MainLayout = () => {
+  const { projectStructure } = useAgent();
+
   return (
     <AgentProvider>
       <MessageProvider>
@@ -27,7 +31,11 @@ const MainLayout = () => {
                     <Eye className="w-4 h-4 mr-2" />
                     プレビュー
                   </TabsTrigger>
-                  <TabsTrigger value="agents" className="flex-1">
+                  <TabsTrigger value="structure" className="flex-1">
+                    <FolderTree className="w-4 h-4 mr-2" />
+                    プロジェクト構造
+                  </TabsTrigger>
+                  <TabsTrigger value="process" className="flex-1">
                     <Bot className="w-4 h-4 mr-2" />
                     生成プロセス
                   </TabsTrigger>
@@ -36,8 +44,14 @@ const MainLayout = () => {
                 <TabsContent value="preview" className="mt-0">
                   <PreviewSection />
                 </TabsContent>
+
+                <TabsContent value="structure" className="mt-0">
+                  {projectStructure && (
+                    <FileExplorer structure={projectStructure} />
+                  )}
+                </TabsContent>
                 
-                <TabsContent value="agents" className="mt-0">
+                <TabsContent value="process" className="mt-0">
                   <AgentSection />
                 </TabsContent>
               </Tabs>
