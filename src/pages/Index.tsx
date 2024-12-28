@@ -1,8 +1,7 @@
-import React from 'react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import MainLayout from '@/components/layout/MainLayout';
 
 const Index = () => {
-  return <DashboardLayout />;
+  return <MainLayout />;
 };
 
 export default Index;
