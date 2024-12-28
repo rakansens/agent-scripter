@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Message } from '@/lib/types';
-import { GenerationStep } from '@/lib/types/agent';
+import { GenerationStep, GenerationStepStatus } from '@/lib/types/agent';
 import { TreeNode } from '@/components/file-explorer/DirectoryTree';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -32,7 +32,7 @@ export const useCodeGeneration = () => {
         id: String(index + 1),
         name: agent.name,
         agentRole: agent.role,
-        status: index === 0 ? "in-progress" : "pending",
+        status: index === 0 ? "in-progress" as const : "pending" as const,
         message: index === 0 ? "処理を開始しています..." : "待機中",
         timestamp: new Date(),
       }));
@@ -57,9 +57,9 @@ export const useCodeGeneration = () => {
         
         const updatedSteps = initialSteps.map((step, index) => ({
           ...step,
-          status: index < i ? "completed" : 
-                 index === i ? "in-progress" : 
-                 "pending",
+          status: index < i ? ("completed" as const) : 
+                 index === i ? ("in-progress" as const) : 
+                 ("pending" as const),
           message: index < i ? "完了" : index === i ? "処理中..." : "待機中",
         }));
         setGenerationSteps(updatedSteps);
