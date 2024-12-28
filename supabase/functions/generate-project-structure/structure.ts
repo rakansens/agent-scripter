@@ -1,5 +1,5 @@
 import { ProjectStructure } from './types.ts';
-import { generateLayoutComponents, generateUIComponents, generateLandingPageComponents } from './components.ts';
+import { generateLayoutComponents, generateUIComponents } from './components.ts';
 
 export const generateProjectStructure = (prompt: string): ProjectStructure => {
   return {
@@ -31,13 +31,6 @@ export const generateProjectStructure = (prompt: string): ProjectStructure => {
                 path: "/src/components/ui",
                 description: "UI components",
                 children: generateUIComponents()
-              },
-              {
-                name: "sections",
-                type: "directory",
-                path: "/src/components/sections",
-                description: "Landing page sections",
-                children: generateLandingPageComponents(prompt)
               }
             ]
           }
