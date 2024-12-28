@@ -27,7 +27,6 @@ const ChatSection = () => {
     setGenerationProgress(0);
 
     try {
-      // Initialize generation steps with all agents
       const initialSteps: GenerationStep[] = INITIAL_AGENTS.map((agent, index) => ({
         id: String(index + 1),
         name: agent.name,
@@ -48,11 +47,24 @@ const ChatSection = () => {
       console.log('Generated project structure:', response.data.structure);
       setProjectStructure(response.data.structure);
       setGenerationProgress(25);
+
+      // 生成されたファイルの情報をメッセージとして追加
+      const filesList = response.data.structure.components
+        .map(comp => `- ${comp.name}`)
+        .join('\n');
+
+      const filesMessage: Message = {
+        id: Date.now().toString(),
+        content: `以下のファイルが生成されました：\n\n${filesList}`,
+        role: "assistant",
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, filesMessage]);
       
-      // Update generation steps as each agent completes its task
       let progress = 25;
       for (let i = 1; i < initialSteps.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate agent processing
+        await new Promise(resolve => setTimeout(resolve, 1000));
         progress += Math.floor(75 / (initialSteps.length - 1));
         setGenerationProgress(progress);
         
@@ -66,7 +78,6 @@ const ChatSection = () => {
         setGenerationSteps(updatedSteps);
       }
 
-      // Set all steps to completed
       const completedSteps = initialSteps.map(step => ({
         ...step,
         status: "completed" as GenerationStepStatus,
