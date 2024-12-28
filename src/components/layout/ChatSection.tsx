@@ -5,6 +5,8 @@ import { useAgent } from '@/contexts/AgentContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Message } from '@/lib/types';
+import { GenerationStep, AgentRole } from '@/lib/types/agent';
+import { INITIAL_AGENTS } from '@/lib/constants/agents';
 
 const ChatSection = () => {
   const { messages, isTyping, currentStreamedMessage, setMessages, setIsTyping, setCurrentStreamedMessage } = useMessage();
@@ -19,7 +21,7 @@ const ChatSection = () => {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev: Message[]) => [...prev, newMessage]);
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
@@ -54,7 +56,7 @@ const ChatSection = () => {
         progress += Math.floor(75 / (initialSteps.length - 1));
         setGenerationProgress(progress);
         
-        setGenerationSteps(prev => 
+        setGenerationSteps((prev: GenerationStep[]) => 
           prev.map((step, index) => ({
             ...step,
             status: index < i ? "completed" : index === i ? "in-progress" : "pending",
@@ -64,7 +66,7 @@ const ChatSection = () => {
       }
 
       // Set all steps to completed
-      setGenerationSteps(prev => 
+      setGenerationSteps((prev: GenerationStep[]) => 
         prev.map(step => ({
           ...step,
           status: "completed",
