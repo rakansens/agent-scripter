@@ -21,7 +21,7 @@ const ChatSection = () => {
       timestamp: new Date(),
     };
 
-    setMessages([...messages, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
@@ -48,7 +48,6 @@ const ChatSection = () => {
       setProjectStructure(response.data.structure);
       setGenerationProgress(25);
 
-      // 生成されたファイルの情報をメッセージとして追加
       const filesList = response.data.structure.components
         .map(comp => `- ${comp.name}`)
         .join('\n');
@@ -60,7 +59,7 @@ const ChatSection = () => {
         timestamp: new Date(),
       };
 
-      setMessages((prev: Message[]) => [...prev, filesMessage]);
+      setMessages(prev => [...prev, filesMessage]);
       
       let progress = 25;
       for (let i = 1; i < initialSteps.length; i++) {

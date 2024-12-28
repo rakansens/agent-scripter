@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, Dispatch, SetStateAction } from 'react';
 import { Message } from '@/lib/types';
 
 interface MessageContextType {
   messages: Message[];
   isTyping: boolean;
   currentStreamedMessage: string;
-  setMessages: (messages: Message[]) => void;
+  setMessages: Dispatch<SetStateAction<Message[]>>;
   setIsTyping: (isTyping: boolean) => void;
   setCurrentStreamedMessage: (message: string) => void;
 }
