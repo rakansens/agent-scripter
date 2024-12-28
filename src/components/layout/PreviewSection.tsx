@@ -8,8 +8,7 @@ import CodeGenerationVisualizer from '@/components/code-generation/CodeGeneratio
 import ProjectStructureView from '@/components/project-structure/ProjectStructureView';
 import { FileViewer } from '@/components/file-viewer/FileViewer';
 import { useAgent } from '@/contexts/AgentContext';
-import GeneratedLandingPage from '@/components/preview/GeneratedLandingPage';
-import PreviewContainer from '@/components/preview/PreviewContainer';
+import CodePreview from '@/components/preview/CodePreview';
 import { FileNode } from '@/components/file-explorer/FileExplorer';
 
 const PreviewSection = () => {
@@ -19,11 +18,12 @@ const PreviewSection = () => {
   const [showPreview, setShowPreview] = useState(false);
 
   const handleFileSelect = (file: FileNode) => {
-    console.log('Selected file:', file);
     setSelectedFile(file);
+    if (file.content) {
+      setCurrentGeneratedCode(file.content);
+    }
   };
 
-  // プロジェクト構造が存在しない場合の表示
   if (!projectStructure) {
     return (
       <div className="lg:col-span-1 space-y-4">
@@ -59,10 +59,8 @@ const PreviewSection = () => {
         </Button>
       </div>
 
-      {showPreview ? (
-        <PreviewContainer>
-          <GeneratedLandingPage />
-        </PreviewContainer>
+      {showPreview && selectedFile?.content ? (
+        <CodePreview code={selectedFile.content} language={selectedFile.language} />
       ) : (
         <>
           <Card className="p-4">
