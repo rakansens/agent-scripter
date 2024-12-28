@@ -5,10 +5,11 @@ import { Folder, FileCode, ChevronRight, ChevronDown } from 'lucide-react';
 import CodeBlock from '../chat/CodeBlock';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
+import { FileNode } from '@/components/file-explorer/FileExplorer';
 
 interface ProjectStructureViewProps {
   structure: ProjectStructure;
-  onSelect?: (path: string) => void;
+  onSelect?: (file: FileNode) => void;
 }
 
 const ProjectStructureView: React.FC<ProjectStructureViewProps> = ({
@@ -32,7 +33,16 @@ const ProjectStructureView: React.FC<ProjectStructureViewProps> = ({
   const handleComponentSelect = (component: ComponentStructure) => {
     console.log('Selected component:', component);
     setSelectedComponent(component);
-    onSelect?.(component.name);
+    
+    // FileNodeオブジェクトを作成して渡す
+    const fileNode: FileNode = {
+      name: component.name,
+      type: 'file',
+      content: component.code || '',
+      language: component.language || 'typescript'
+    };
+    
+    onSelect?.(fileNode);
 
     if (!component.code) {
       toast({
