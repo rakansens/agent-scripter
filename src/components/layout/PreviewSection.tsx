@@ -6,6 +6,8 @@ import CodeGenerationVisualizer from '@/components/code-generation/CodeGeneratio
 import ProjectStructureView from '@/components/project-structure/ProjectStructureView';
 import { FileViewer } from '@/components/file-viewer/FileViewer';
 import { useAgent } from '@/contexts/AgentContext';
+import GeneratedLandingPage from '@/components/preview/GeneratedLandingPage';
+import PreviewContainer from '@/components/preview/PreviewContainer';
 
 const PreviewSection = () => {
   const { generationSteps, projectStructure, generationProgress } = useAgent();
@@ -19,6 +21,10 @@ const PreviewSection = () => {
 
   return (
     <div className="lg:col-span-1 space-y-4">
+      <PreviewContainer>
+        <GeneratedLandingPage />
+      </PreviewContainer>
+
       <Card className="p-4">
         <CodeGenerationProgress
           progress={generationProgress}
