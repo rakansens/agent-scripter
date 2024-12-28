@@ -27,7 +27,7 @@ export const ComponentGenerationProvider = ({ children }: { children: React.Reac
       }}
     >
       {children}
-    </ComponentGenerationProvider>
+    </ComponentGenerationContext.Provider>
   );
 };
 
