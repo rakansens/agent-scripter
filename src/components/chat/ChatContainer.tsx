@@ -2,6 +2,7 @@ import { Message } from "@/lib/types";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import { useComponentGeneration } from "@/contexts/ComponentGenerationContext";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ChatContainerProps {
   messages: Message[];
@@ -11,11 +12,18 @@ interface ChatContainerProps {
 }
 
 const ChatContainer = ({ messages, isTyping, onSendMessage, streamedMessage }: ChatContainerProps) => {
-  const { setIsGenerating } = useComponentGeneration();
+  const { setIsGenerating, clearComponents } = useComponentGeneration();
+  const { toast } = useToast();
 
   const handleSendMessage = (content: string) => {
     setIsGenerating(true);
+    clearComponents(); // 新しい生成を開始する前に既存のコンポーネントをクリア
     onSendMessage(content);
+    
+    toast({
+      title: "生成を開始",
+      description: "新しいコンポーネントの生成を開始します",
+    });
   };
 
   return (

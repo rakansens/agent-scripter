@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useComponentGeneration } from '@/contexts/ComponentGenerationContext';
+import { useToast } from '@/components/ui/use-toast';
 
 const GeneratedLandingPage = () => {
   const { generatedComponents, isGenerating } = useComponentGeneration();
+  const { toast } = useToast();
 
-  if (isGenerating) {
+  useEffect(() => {
+    if (isGenerating) {
+      toast({
+        title: "コンポーネント生成中",
+        description: "プレビューを更新しています...",
+      });
+    }
+  }, [isGenerating, toast]);
+
+  if (isGenerating && generatedComponents.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -28,7 +39,7 @@ const GeneratedLandingPage = () => {
       {generatedComponents.map((component, index) => (
         <div 
           key={index}
-          className="p-4 border-b border-gray-200"
+          className="p-4 border-b border-gray-200 animate-fade-in"
           dangerouslySetInnerHTML={{ __html: component }}
         />
       ))}

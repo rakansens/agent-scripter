@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 interface ComponentGenerationContextType {
   generatedComponents: string[];
   addGeneratedComponent: (component: string) => void;
   isGenerating: boolean;
   setIsGenerating: (state: boolean) => void;
+  clearComponents: () => void;
 }
 
 const ComponentGenerationContext = createContext<ComponentGenerationContextType | undefined>(undefined);
@@ -13,9 +14,13 @@ export const ComponentGenerationProvider = ({ children }: { children: React.Reac
   const [generatedComponents, setGeneratedComponents] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const addGeneratedComponent = (component: string) => {
+  const addGeneratedComponent = useCallback((component: string) => {
     setGeneratedComponents(prev => [...prev, component]);
-  };
+  }, []);
+
+  const clearComponents = useCallback(() => {
+    setGeneratedComponents([]);
+  }, []);
 
   return (
     <ComponentGenerationContext.Provider 
@@ -23,7 +28,8 @@ export const ComponentGenerationProvider = ({ children }: { children: React.Reac
         generatedComponents, 
         addGeneratedComponent, 
         isGenerating, 
-        setIsGenerating 
+        setIsGenerating,
+        clearComponents
       }}
     >
       {children}
