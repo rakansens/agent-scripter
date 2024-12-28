@@ -39,6 +39,15 @@ const ChatSection = () => {
       
       setGenerationSteps(initialSteps);
 
+      // Add a progress message to the chat
+      const progressMessage: Message = {
+        id: Date.now().toString(),
+        content: "生成を開始します...",
+        role: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, progressMessage]);
+
       const response = await supabase.functions.invoke("generate-project-structure", {
         body: { prompt: content },
       });
@@ -49,6 +58,15 @@ const ChatSection = () => {
       setProjectStructure(response.data.structure);
       setGenerationProgress(25);
       
+      // Add structure generation message
+      const structureMessage: Message = {
+        id: Date.now().toString(),
+        content: `以下のファイルが生成されました：\n\n${response.data.structure.components.map(comp => `- ${comp.path}`).join('\n')}`,
+        role: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, structureMessage]);
+
       // Update generation steps as each agent completes its task
       let progress = 25;
       for (let i = 1; i < initialSteps.length; i++) {
@@ -64,6 +82,15 @@ const ChatSection = () => {
           message: index < i ? "完了" : index === i ? "処理中..." : "待機中",
         }));
         setGenerationSteps(updatedSteps);
+
+        // Add progress update message
+        const stepMessage: Message = {
+          id: Date.now().toString(),
+          content: `${updatedSteps[i].name}の処理を実行中...\n進捗: ${progress}%`,
+          role: "assistant",
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, stepMessage]);
       }
 
       // Set all steps to completed
@@ -74,6 +101,15 @@ const ChatSection = () => {
       }));
       setGenerationSteps(completedSteps);
 
+      // Add completion message
+      const completionMessage: Message = {
+        id: Date.now().toString(),
+        content: "生成が完了しました！",
+        role: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, completionMessage]);
+
       setGenerationProgress(100);
       toast({
         title: "生成完了",
@@ -82,6 +118,16 @@ const ChatSection = () => {
 
     } catch (error) {
       console.error("Error in project generation:", error);
+      
+      // Add error message to chat
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        content: "エラーが発生しました。もう一度お試しください。",
+        role: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+
       toast({
         variant: "destructive",
         title: "エラーが発生しました",

@@ -2,11 +2,10 @@ import React from 'react';
 import Layout from './Layout';
 import ChatSection from './ChatSection';
 import PreviewSection from './PreviewSection';
-import AgentSection from './AgentSection';
 import { AgentProvider } from '@/contexts/AgentContext';
 import { MessageProvider } from '@/contexts/MessageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, FolderTree, Bot } from 'lucide-react';
+import { Eye, FolderTree } from 'lucide-react';
 import FileExplorer from '../file-explorer/FileExplorer';
 import { useAgent } from '@/contexts/AgentContext';
 
@@ -33,10 +32,6 @@ const MainContent = () => {
                 <FolderTree className="w-4 h-4 mr-2" />
                 プロジェクト構造
               </TabsTrigger>
-              <TabsTrigger value="process" className="flex-1">
-                <Bot className="w-4 h-4 mr-2" />
-                生成プロセス
-              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="preview" className="mt-0">
@@ -58,10 +53,6 @@ const MainContent = () => {
                   }} 
                 />
               )}
-            </TabsContent>
-            
-            <TabsContent value="process" className="mt-0">
-              <AgentSection />
             </TabsContent>
           </Tabs>
         </div>
