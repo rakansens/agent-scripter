@@ -8,20 +8,36 @@ import CodeGenerationVisualizer from '@/components/code-generation/CodeGeneratio
 import ProjectStructureView from '@/components/project-structure/ProjectStructureView';
 import { FileViewer } from '@/components/file-viewer/FileViewer';
 import { useAgent } from '@/contexts/AgentContext';
-import CodePreview from '@/components/preview/CodePreview';
+import CodePreview from '@/components/chat/CodePreview';
 import { FileNode } from '@/components/file-explorer/FileExplorer';
+import { useToast } from '@/components/ui/use-toast';
 
 const PreviewSection = () => {
   const { generationSteps, projectStructure, generationProgress } = useAgent();
   const [selectedFile, setSelectedFile] = React.useState<FileNode | null>(null);
   const [currentGeneratedCode, setCurrentGeneratedCode] = React.useState<string>('');
   const [showPreview, setShowPreview] = useState(false);
+  const { toast } = useToast();
 
   const handleFileSelect = (file: FileNode) => {
     setSelectedFile(file);
     if (file.content) {
       setCurrentGeneratedCode(file.content);
+      console.log('Selected file content:', file.content); // デバッグ用
     }
+  };
+
+  const togglePreview = () => {
+    if (!selectedFile?.content && !showPreview) {
+      toast({
+        title: "プレビューできません",
+        description: "プレビューするファイルを選択してください。",
+        variant: "destructive",
+      });
+      return;
+    }
+    setShowPreview(!showPreview);
+    console.log('Preview toggled:', !showPreview); // デバッグ用
   };
 
   if (!projectStructure) {
@@ -44,7 +60,7 @@ const PreviewSection = () => {
         <Button
           variant={showPreview ? "outline" : "default"}
           size="sm"
-          onClick={() => setShowPreview(false)}
+          onClick={togglePreview}
         >
           <Code2 className="w-4 h-4 mr-2" />
           コード
@@ -52,7 +68,7 @@ const PreviewSection = () => {
         <Button
           variant={showPreview ? "default" : "outline"}
           size="sm"
-          onClick={() => setShowPreview(true)}
+          onClick={togglePreview}
         >
           <Eye className="w-4 h-4 mr-2" />
           プレビュー
@@ -60,7 +76,9 @@ const PreviewSection = () => {
       </div>
 
       {showPreview && selectedFile?.content ? (
-        <CodePreview code={selectedFile.content} language={selectedFile.language} />
+        <Card className="p-4">
+          <CodePreview code={selectedFile.content} />
+        </Card>
       ) : (
         <>
           <Card className="p-4">

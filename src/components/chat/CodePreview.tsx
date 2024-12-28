@@ -13,46 +13,55 @@ const CodePreview = ({ code }: CodePreviewProps) => {
       const iframe = iframeRef.current;
       
       try {
+        console.log('Rendering code:', code); // デバッグ用
         const blob = new Blob([`
           <!DOCTYPE html>
           <html>
             <head>
               <meta charset="utf-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+              <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+              <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
               <style>
                 body { 
                   margin: 0; 
-                  padding: 16px; 
+                  padding: 16px;
                   font-family: system-ui, -apple-system, sans-serif;
-                  line-height: 1.5;
-                }
-                .error {
-                  color: #ef4444;
-                  padding: 8px;
-                  border: 1px solid #ef4444;
-                  border-radius: 4px;
-                  margin: 8px 0;
                 }
                 .preview-container {
                   padding: 1rem;
                   border-radius: 0.5rem;
                   background: white;
                 }
+                .error {
+                  color: red;
+                  padding: 8px;
+                  border: 1px solid red;
+                  margin: 8px 0;
+                  border-radius: 4px;
+                }
               </style>
             </head>
             <body>
-              <div class="preview-container">
-                ${code}
-              </div>
-              <script>
-                window.onerror = function(msg, url, line) {
+              <div id="root"></div>
+              <script type="text/babel">
+                try {
+                  ${code}
+                  
+                  // コンポーネントが存在する場合はレンダリング
+                  if (typeof App !== 'undefined') {
+                    ReactDOM.render(<App />, document.getElementById('root'));
+                  } else {
+                    // コードをそのまま表示
+                    ReactDOM.render(${code}, document.getElementById('root'));
+                  }
+                } catch (error) {
                   const errorDiv = document.createElement('div');
                   errorDiv.className = 'error';
-                  errorDiv.textContent = 'Error: ' + msg + ' (line ' + line + ')';
+                  errorDiv.textContent = 'Error: ' + error.message;
                   document.body.appendChild(errorDiv);
-                  window.parent.postMessage({ type: 'error', message: msg }, '*');
-                  return false;
-                };
+                }
               </script>
             </body>
           </html>
@@ -61,27 +70,16 @@ const CodePreview = ({ code }: CodePreviewProps) => {
         const url = URL.createObjectURL(blob);
         iframe.src = url;
 
-        const handleMessage = (event: MessageEvent) => {
-          if (event.data.type === 'error') {
-            setError(event.data.message);
-          }
-        };
-
-        window.addEventListener('message', handleMessage);
-
-        return () => {
-          URL.revokeObjectURL(url);
-          window.removeEventListener('message', handleMessage);
-        };
+        return () => URL.revokeObjectURL(url);
       } catch (error) {
         console.error('Error in CodePreview:', error);
-        setError(error instanceof Error ? error.message : 'An error occurred');
+        setError(error instanceof Error ? error.message : 'エラーが発生しました');
       }
     }
   }, [code]);
 
   return (
-    <div className="relative w-full h-full min-h-[200px] bg-white rounded-lg overflow-hidden">
+    <div className="relative w-full h-full min-h-[400px] bg-white rounded-lg overflow-hidden">
       {error && (
         <div className="absolute top-0 left-0 right-0 bg-red-100 text-red-600 p-2 text-sm">
           {error}
