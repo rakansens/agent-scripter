@@ -20,7 +20,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
       const [intro, filesList] = content.split('\n\n');
       return (
         <>
-          <p className="text-sm mb-2 text-gray-700 dark:text-gray-300">{intro}</p>
+          <p className="text-sm mb-2 text-white">{intro}</p>
           <div className="space-y-1">
             {filesList.split('\n').map((line, index) => {
               const filePath = line.replace('- ', '');
@@ -28,7 +28,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
                 <button
                   key={index}
                   onClick={() => console.log('Selected file:', filePath)}
-                  className="text-sm text-blue-500 hover:text-blue-400 dark:text-blue-400 dark:hover:text-blue-300 block text-left transition-colors"
+                  className="text-sm text-blue-400 hover:text-blue-300 dark:text-blue-400 dark:hover:text-blue-300 block text-left transition-colors"
                 >
                   {filePath}
                 </button>
@@ -47,7 +47,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
     while ((match = codeBlockRegex.exec(content)) !== null) {
       if (match.index > lastIndex) {
         parts.push(
-          <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+          <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-white">
             {content.slice(lastIndex, match.index)}
           </p>
         );
@@ -100,14 +100,14 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
 
     if (lastIndex < content.length) {
       parts.push(
-        <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+        <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-white">
           {content.slice(lastIndex)}
         </p>
       );
     }
 
     return parts.length > 0 ? parts : (
-      <p className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">{content}</p>
+      <p className="text-sm whitespace-pre-wrap text-white">{content}</p>
     );
   };
 
@@ -131,7 +131,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
           "max-w-[80%] rounded-lg px-4 py-3 shadow-lg",
           isUser
             ? "bg-primary text-primary-foreground ring-1 ring-primary/10"
-            : "bg-white dark:bg-gray-900/95 shadow-sm border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm"
+            : "bg-gray-800/95 dark:bg-gray-900/95 shadow-sm border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm"
         )}
       >
         {renderContent(message.content)}
