@@ -86,6 +86,15 @@ const PreviewSection = () => {
               steps={generationSteps}
               tech={["React", "TypeScript", "Tailwind CSS"]}
             />
+
+            <div className="mt-4">
+              <ScrollArea className="h-[400px]">
+                <ProjectStructureView
+                  structure={projectStructure}
+                  onSelect={handleFileSelect}
+                />
+              </ScrollArea>
+            </div>
           </Card>
           
           <CodeGenerationVisualizer 
@@ -93,20 +102,9 @@ const PreviewSection = () => {
             currentCode={currentGeneratedCode}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="p-4">
-              <ScrollArea className="h-[400px]">
-                <ProjectStructureView
-                  structure={projectStructure}
-                  onSelect={handleFileSelect}
-                />
-              </ScrollArea>
-            </Card>
-
-            {selectedFile && (
-              <FileViewer file={selectedFile} />
-            )}
-          </div>
+          {selectedFile && (
+            <FileViewer file={selectedFile} />
+          )}
         </>
       )}
     </div>
