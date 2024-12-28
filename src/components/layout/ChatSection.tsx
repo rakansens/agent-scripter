@@ -5,7 +5,7 @@ import { useAgent } from '@/contexts/AgentContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Message } from '@/lib/types';
-import { GenerationStep, AgentRole } from '@/lib/types/agent';
+import { GenerationStep, AgentRole, GenerationStepStatus } from '@/lib/types/agent';
 import { INITIAL_AGENTS } from '@/lib/constants/agents';
 
 const ChatSection = () => {
@@ -32,7 +32,7 @@ const ChatSection = () => {
         id: String(index + 1),
         name: agent.name,
         agentRole: agent.role as AgentRole,
-        status: index === 0 ? "in-progress" : "pending",
+        status: index === 0 ? "in-progress" as const : "pending" as GenerationStepStatus,
         message: index === 0 ? "処理を開始しています..." : "待機中",
         timestamp: new Date(),
       }));
@@ -58,7 +58,9 @@ const ChatSection = () => {
         
         const updatedSteps = initialSteps.map((step, index) => ({
           ...step,
-          status: index < i ? "completed" : index === i ? "in-progress" : "pending",
+          status: index < i ? ("completed" as GenerationStepStatus) : 
+                 index === i ? ("in-progress" as const) : 
+                 ("pending" as GenerationStepStatus),
           message: index < i ? "完了" : index === i ? "処理中..." : "待機中",
         }));
         setGenerationSteps(updatedSteps);
@@ -67,7 +69,7 @@ const ChatSection = () => {
       // Set all steps to completed
       const completedSteps = initialSteps.map(step => ({
         ...step,
-        status: "completed",
+        status: "completed" as GenerationStepStatus,
         message: "完了",
       }));
       setGenerationSteps(completedSteps);
