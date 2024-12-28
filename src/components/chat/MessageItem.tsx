@@ -114,7 +114,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
   return (
     <div
       className={cn(
-        "flex animate-fade-in p-4 group hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors",
+        "flex animate-fade-in p-4 group hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors",
         isUser ? "justify-end" : "justify-start"
       )}
     >
@@ -128,10 +128,10 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
       
       <div
         className={cn(
-          "max-w-[80%] rounded-lg px-4 py-3",
+          "max-w-[80%] rounded-lg px-4 py-3 shadow-lg",
           isUser
-            ? "bg-primary text-primary-foreground"
-            : "bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800"
+            ? "bg-primary text-primary-foreground ring-1 ring-primary/10"
+            : "bg-white dark:bg-gray-900/95 shadow-sm border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm"
         )}
       >
         {renderContent(message.content)}
