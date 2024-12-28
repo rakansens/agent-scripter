@@ -11,12 +11,48 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ProjectStructureView from "@/components/project-structure/ProjectStructureView";
 import CodeGenerationVisualizer from "@/components/code-generation/CodeGenerationVisualizer";
 import { FileViewer } from "@/components/file-viewer/FileViewer";
+import PreviewContainer from "@/components/preview/PreviewContainer";
+import GeneratedLandingPage from "@/components/preview/GeneratedLandingPage";
+import { AGENT_PROMPTS, AgentRole } from "@/components/agents/AgentPrompts";
 
-// Move types to a separate file to reduce complexity
-interface ComponentWithCode {
-  path: string;
-  content: string;
-}
+const INITIAL_AGENTS: Agent[] = [
+  {
+    role: "architect",
+    name: "Architect Agent",
+    description: "Designs the overall project structure and component hierarchy",
+    capabilities: ["Project planning", "Directory structure", "Dependency management"],
+  },
+  {
+    role: "component-generator",
+    name: "Component Generator",
+    description: "Generates React components and their implementations",
+    capabilities: ["React", "TypeScript", "Component patterns"],
+  },
+  {
+    role: "styling",
+    name: "Styling Agent",
+    description: "Handles component styling and visual design",
+    capabilities: ["TailwindCSS", "Responsive design", "Accessibility"],
+  },
+  {
+    role: "testing",
+    name: "Testing Agent",
+    description: "Creates test cases and ensures code quality",
+    capabilities: ["Unit testing", "Integration testing", "Test coverage"],
+  },
+  {
+    role: "content",
+    name: "Content Agent",
+    description: "Generates and optimizes content",
+    capabilities: ["SEO optimization", "Content strategy", "Multilingual support"],
+  },
+  {
+    role: "performance",
+    name: "Performance Agent",
+    description: "Optimizes application performance",
+    capabilities: ["Image optimization", "Code splitting", "Bundle optimization"],
+  },
+];
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -27,6 +63,7 @@ const Index = () => {
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
   const [currentGeneratedCode, setCurrentGeneratedCode] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
 
   const handleFileSelect = (path: string) => {
@@ -47,41 +84,19 @@ const Index = () => {
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
     setCurrentGeneratedCode("");
+    setShowPreview(false);
     
-    setGenerationSteps([
-      {
-        id: "1",
-        name: "プロジェクト構造の分析",
-        agentRole: "architect",
-        status: "in-progress",
-        message: "要件を分析し、プロジェクト構造を設計中",
-        timestamp: new Date(),
-      },
-      {
-        id: "2",
-        name: "コンポーネント生成",
-        agentRole: "component-generator",
-        status: "pending",
-        message: "コンポーネント生成待機中",
-        timestamp: new Date(),
-      },
-      {
-        id: "3",
-        name: "スタイリング",
-        agentRole: "styling",
-        status: "pending",
-        message: "スタイリング待機中",
-        timestamp: new Date(),
-      },
-      {
-        id: "4",
-        name: "テスト生成",
-        agentRole: "testing",
-        status: "pending",
-        message: "テスト生成待機中",
-        timestamp: new Date(),
-      },
-    ]);
+    // Initialize generation steps with all agents
+    const initialSteps: GenerationStep[] = INITIAL_AGENTS.map((agent, index) => ({
+      id: String(index + 1),
+      name: agent.name,
+      agentRole: agent.role as AgentRole,
+      status: index === 0 ? "in-progress" : "pending",
+      message: index === 0 ? "処理を開始しています..." : "待機中",
+      timestamp: new Date(),
+    }));
+    
+    setGenerationSteps(initialSteps);
 
     try {
       const response = await supabase.functions.invoke("generate-project-structure", {
@@ -95,52 +110,37 @@ const Index = () => {
       setGenerationProgress(25);
       setCurrentGeneratedCode(response.data.currentCode || "");
       
-      setGenerationSteps((prev) =>
-        prev.map((step) =>
-          step.agentRole === "architect"
-            ? { ...step, status: "completed", message: "プロジェクト構造の生成が完了しました" }
-            : step.agentRole === "component-generator"
-            ? { ...step, status: "in-progress", message: "コンポーネントを生成中..." }
-            : step
-        )
-      );
-
-      const componentResponse = await supabase.functions.invoke(
-        "generate-components",
-        {
-          body: { structure: response.data.structure },
-        }
-      );
-
-      if (!componentResponse.data) throw new Error("Component generation failed");
-      console.log('Generated components:', componentResponse.data);
-
-      // Update project structure with generated code
-      if (componentResponse.data.components) {
-        const updatedStructure = updateStructureWithGeneratedCode(
-          response.data.structure,
-          componentResponse.data.components
+      // Update generation steps as each agent completes its task
+      let progress = 25;
+      for (let i = 1; i < initialSteps.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate agent processing
+        progress += Math.floor(75 / (initialSteps.length - 1));
+        setGenerationProgress(progress);
+        
+        setGenerationSteps(prev => 
+          prev.map((step, index) => ({
+            ...step,
+            status: index < i ? "completed" : index === i ? "in-progress" : "pending",
+            message: index < i ? "完了" : index === i ? "処理中..." : "待機中",
+          }))
         );
-        setProjectStructure(updatedStructure);
       }
 
-      setGenerationProgress(100);
-      setGenerationSteps((prev) =>
-        prev.map((step) => ({ ...step, status: "completed" }))
+      // Set all steps to completed
+      setGenerationSteps(prev => 
+        prev.map(step => ({
+          ...step,
+          status: "completed",
+          message: "完了",
+        }))
       );
 
-      // Add system message with generated files
-      const systemMessage: Message = {
-        id: Date.now().toString(),
-        content: generateSystemMessage(componentResponse.data.components),
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, systemMessage]);
+      setGenerationProgress(100);
+      setShowPreview(true);
 
       toast({
         title: "生成完了",
-        description: "全てのコンポーネントが正常に生成されました。",
+        description: "ランディングページの生成が完了しました。",
       });
 
     } catch (error) {
@@ -220,75 +220,17 @@ const Index = () => {
             )}
           </div>
         </div>
+
+        {showPreview && (
+          <div className="mt-8">
+            <PreviewContainer>
+              <GeneratedLandingPage />
+            </PreviewContainer>
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
-// Helper functions moved to keep the main component cleaner
-const updateStructureWithGeneratedCode = (
-  structure: ProjectStructure,
-  generatedComponents: ComponentWithCode[]
-) => {
-  const updateComponent = (component: any) => {
-    if (component.type === 'component') {
-      const generatedComponent = generatedComponents.find(
-        gc => gc.path === component.path
-      );
-      if (generatedComponent) {
-        return {
-          ...component,
-          code: generatedComponent.content,
-          language: 'typescript'
-        };
-      }
-    }
-    if (component.children) {
-      return {
-        ...component,
-        children: component.children.map(updateComponent)
-      };
-    }
-    return component;
-  };
-
-  return {
-    ...structure,
-    components: structure.components.map(updateComponent)
-  };
-};
-
-const generateSystemMessage = (components: ComponentWithCode[]) => {
-  return `以下のファイルが生成されました：\n\n${components
-    .map(c => `- ${c.path}`)
-    .join('\n')}`;
-};
-
-const INITIAL_AGENTS: Agent[] = [
-  {
-    role: "architect",
-    name: "Architect Agent",
-    description: "Designs the overall project structure and component hierarchy",
-    capabilities: ["Project planning", "Directory structure", "Dependency management"],
-  },
-  {
-    role: "component-generator",
-    name: "Component Generator",
-    description: "Generates React components and their implementations",
-    capabilities: ["React", "TypeScript", "Component patterns"],
-  },
-  {
-    role: "styling",
-    name: "Styling Agent",
-    description: "Handles component styling and visual design",
-    capabilities: ["TailwindCSS", "Responsive design", "Accessibility"],
-  },
-  {
-    role: "testing",
-    name: "Testing Agent",
-    description: "Creates test cases and ensures code quality",
-    capabilities: ["Unit testing", "Integration testing", "Test coverage"],
-  },
-];
 
 export default Index;
