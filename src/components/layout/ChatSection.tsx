@@ -21,7 +21,7 @@ const ChatSection = () => {
       timestamp: new Date(),
     };
 
-    setMessages((prev: Message[]) => [...prev, newMessage]);
+    setMessages([...messages, newMessage]);
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
@@ -56,23 +56,21 @@ const ChatSection = () => {
         progress += Math.floor(75 / (initialSteps.length - 1));
         setGenerationProgress(progress);
         
-        setGenerationSteps((prev: GenerationStep[]) => 
-          prev.map((step, index) => ({
-            ...step,
-            status: index < i ? "completed" : index === i ? "in-progress" : "pending",
-            message: index < i ? "完了" : index === i ? "処理中..." : "待機中",
-          }))
-        );
+        const updatedSteps = initialSteps.map((step, index) => ({
+          ...step,
+          status: index < i ? "completed" : index === i ? "in-progress" : "pending",
+          message: index < i ? "完了" : index === i ? "処理中..." : "待機中",
+        }));
+        setGenerationSteps(updatedSteps);
       }
 
       // Set all steps to completed
-      setGenerationSteps((prev: GenerationStep[]) => 
-        prev.map(step => ({
-          ...step,
-          status: "completed",
-          message: "完了",
-        }))
-      );
+      const completedSteps = initialSteps.map(step => ({
+        ...step,
+        status: "completed",
+        message: "完了",
+      }));
+      setGenerationSteps(completedSteps);
 
       setGenerationProgress(100);
       toast({
