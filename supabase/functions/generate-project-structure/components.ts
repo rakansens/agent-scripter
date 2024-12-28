@@ -9,14 +9,23 @@ export const generateLayoutComponents = (): ComponentStructure[] => {
       description: "Main header component",
       code: `
 import React from 'react';
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
   return (
     <header className="bg-white shadow">
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Generated Project
-        </h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-purple-600">
+            Beauty Salon
+          </h1>
+          <nav className="hidden md:flex space-x-8">
+            <a href="#services" className="text-gray-600 hover:text-gray-900">サービス</a>
+            <a href="#about" className="text-gray-600 hover:text-gray-900">私たちについて</a>
+            <a href="#contact" className="text-gray-600 hover:text-gray-900">お問い合わせ</a>
+          </nav>
+          <Button>予約する</Button>
+        </div>
       </div>
     </header>
   );
@@ -35,11 +44,33 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800">
-      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <p className="text-center text-gray-300">
-          Generated with Lovable
-        </p>
+    <footer className="bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Beauty Salon</h3>
+            <p className="text-gray-400">
+              最高品質のヘアケアサービスを提供します
+            </p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">営業時間</h3>
+            <p className="text-gray-400">
+              火-日: 10:00 - 20:00<br />
+              月曜定休
+            </p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">お問い合わせ</h3>
+            <p className="text-gray-400">
+              電話: 03-1234-5678<br />
+              メール: info@beautysalon.com
+            </p>
+          </div>
+        </div>
+        <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
+          <p>© 2024 Beauty Salon. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );
@@ -63,9 +94,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow">
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          {children}
-        </div>
+        {children}
       </main>
       <Footer />
     </div>
@@ -91,21 +120,26 @@ import { cn } from '@/lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const Button = ({ 
   children, 
   className, 
-  variant = 'primary', 
+  variant = 'primary',
+  size = 'md',
   ...props 
 }: ButtonProps) => {
   return (
     <button
       className={cn(
-        'px-4 py-2 rounded-md font-medium transition-colors',
+        'rounded-md font-medium transition-colors',
         variant === 'primary' 
-          ? 'bg-blue-600 text-white hover:bg-blue-700' 
-          : 'bg-gray-200 text-gray-900 hover:bg-gray-300',
+          ? 'bg-purple-600 text-white hover:bg-purple-700' 
+          : 'bg-white text-purple-600 border border-purple-600 hover:bg-purple-50',
+        size === 'sm' ? 'px-3 py-1.5 text-sm' :
+        size === 'lg' ? 'px-6 py-3 text-lg' :
+        'px-4 py-2 text-base',
         className
       )}
       {...props}
@@ -136,7 +170,7 @@ const Card = ({ children, className }: CardProps) => {
   return (
     <div 
       className={cn(
-        'bg-white rounded-lg shadow-md p-6',
+        'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow',
         className
       )}
     >
