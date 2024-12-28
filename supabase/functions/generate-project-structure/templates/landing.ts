@@ -1,4 +1,4 @@
-import { ComponentStructure } from '../types';
+import { ComponentStructure } from '../types.ts';
 
 export const generateLandingPageComponents = (): ComponentStructure[] => {
   return [
