@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Eye, Code2 } from 'lucide-react';
 import CodeGenerationProgress from '@/components/chat/CodeGenerationProgress';
 import CodeGenerationVisualizer from '@/components/code-generation/CodeGenerationVisualizer';
-import ProjectStructureView from '@/components/project-structure/ProjectStructureView';
 import { FileViewer } from '@/components/file-viewer/FileViewer';
 import { useAgent } from '@/contexts/AgentContext';
 import { FileNode } from '@/components/file-explorer/FileExplorer';
@@ -86,15 +84,6 @@ const PreviewSection = () => {
               steps={generationSteps}
               tech={["React", "TypeScript", "Tailwind CSS"]}
             />
-
-            <div className="mt-4">
-              <ScrollArea className="h-[400px]">
-                <ProjectStructureView
-                  structure={projectStructure}
-                  onSelect={handleFileSelect}
-                />
-              </ScrollArea>
-            </div>
           </Card>
           
           <CodeGenerationVisualizer 
