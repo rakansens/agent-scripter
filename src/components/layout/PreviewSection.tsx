@@ -9,8 +9,6 @@ import { useAgent } from '@/contexts/AgentContext';
 import GeneratedLandingPage from '@/components/preview/GeneratedLandingPage';
 import PreviewContainer from '@/components/preview/PreviewContainer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code2, Eye, GitBranch } from 'lucide-react';
 
 const PreviewSection = () => {
   const { generationSteps, projectStructure, generationProgress } = useAgent();
@@ -23,70 +21,63 @@ const PreviewSection = () => {
 
   return (
     <div className="space-y-4 h-full overflow-auto">
-      <Tabs defaultValue="preview" className="w-full">
-        <TabsList className="w-full mb-4">
-          <TabsTrigger value="preview" className="flex items-center gap-2">
-            <Eye className="w-4 h-4" />
-            プレビュー
-          </TabsTrigger>
-          <TabsTrigger value="process" className="flex items-center gap-2">
-            <Code2 className="w-4 h-4" />
-            生成プロセス
-          </TabsTrigger>
-          <TabsTrigger value="structure" className="flex items-center gap-2">
-            <GitBranch className="w-4 h-4" />
-            プロジェクト構造
-          </TabsTrigger>
-        </TabsList>
+      <PreviewContainer>
+        <GeneratedLandingPage />
+      </PreviewContainer>
 
-        <TabsContent value="preview" className="mt-0">
-          <PreviewContainer>
-            <GeneratedLandingPage />
-          </PreviewContainer>
-        </TabsContent>
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="progress">
+          <AccordionTrigger>生成の進捗</AccordionTrigger>
+          <AccordionContent>
+            <Card className="p-4">
+              <CodeGenerationProgress
+                progress={generationProgress}
+                status={
+                  generationProgress === 100
+                    ? "生成完了"
+                    : generationProgress > 0
+                    ? "生成中..."
+                    : "待機中"
+                }
+                steps={generationSteps}
+                tech={["React", "TypeScript", "Tailwind CSS"]}
+              />
+            </Card>
+          </AccordionContent>
+        </AccordionItem>
 
-        <TabsContent value="process" className="mt-0 space-y-4">
-          <Card className="p-4">
-            <CodeGenerationProgress
-              progress={generationProgress}
-              status={
-                generationProgress === 100
-                  ? "生成完了"
-                  : generationProgress > 0
-                  ? "生成中..."
-                  : "待機中"
-              }
-              steps={generationSteps}
-              tech={["React", "TypeScript", "Tailwind CSS"]}
-            />
-          </Card>
+        {projectStructure && (
+          <AccordionItem value="structure">
+            <AccordionTrigger>プロジェクト構造</AccordionTrigger>
+            <AccordionContent>
+              <Card className="p-4">
+                <ScrollArea className="h-[300px]">
+                  <ProjectStructureView
+                    structure={projectStructure}
+                    onSelect={handleFileSelect}
+                  />
+                </ScrollArea>
+              </Card>
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-          <Card className="p-4">
+        <AccordionItem value="code">
+          <AccordionTrigger>生成されたコード</AccordionTrigger>
+          <AccordionContent>
             <CodeGenerationVisualizer 
               steps={generationSteps}
               currentCode={currentGeneratedCode}
             />
-          </Card>
-        </TabsContent>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-        <TabsContent value="structure" className="mt-0">
-          {projectStructure && (
-            <Card className="p-4">
-              <ScrollArea className="h-[calc(100vh-12rem)]">
-                <ProjectStructureView
-                  structure={projectStructure}
-                  onSelect={handleFileSelect}
-                />
-              </ScrollArea>
-            </Card>
-          )}
-          {selectedFile && (
-            <Card className="mt-4 p-4">
-              <FileViewer filePath={selectedFile} />
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+      {selectedFile && (
+        <Card className="p-4">
+          <FileViewer filePath={selectedFile} />
+        </Card>
+      )}
     </div>
   );
 };
