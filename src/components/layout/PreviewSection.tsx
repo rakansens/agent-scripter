@@ -86,15 +86,6 @@ const PreviewSection = () => {
               steps={generationSteps}
               tech={["React", "TypeScript", "Tailwind CSS"]}
             />
-
-            <div className="mt-4">
-              <ScrollArea className="h-[400px]">
-                <ProjectStructureView
-                  structure={projectStructure}
-                  onSelect={handleFileSelect}
-                />
-              </ScrollArea>
-            </div>
           </Card>
           
           <CodeGenerationVisualizer 
