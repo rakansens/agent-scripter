@@ -15,31 +15,31 @@ const MainContent = () => {
 
   return (
     <Layout>
-      <div className="fixed inset-0 flex overflow-hidden bg-gray-50 dark:bg-gray-950">
-        {/* 左サイド：チャットセクション */}
-        <div className="w-[450px] flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+      <div className="fixed inset-0 flex overflow-hidden">
+        {/* チャットセクション */}
+        <div className="w-[450px] flex flex-col bg-white/90 dark:bg-gray-900/90 border-r border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm">
           <ChatSection />
         </div>
 
-        {/* 右サイド：タブ付きコンテンツエリア */}
+        {/* タブ付きコンテンツエリア */}
         <div className="flex-1 overflow-auto">
-          <div className="h-full p-6">
+          <div className="h-full p-4">
             <Tabs defaultValue="preview" className="h-full flex flex-col">
-              <div className="mb-6 px-2">
-                <TabsList className="w-full p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                  <TabsTrigger value="preview" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
+              <div className="mb-4">
+                <TabsList className="w-full p-1 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200/50 dark:border-gray-700/50">
+                  <TabsTrigger value="preview" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:shadow-sm transition-all">
                     <Eye className="w-4 h-4 mr-2" />
                     プレビュー
                   </TabsTrigger>
-                  <TabsTrigger value="structure" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
+                  <TabsTrigger value="structure" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:shadow-sm transition-all">
                     <FolderTree className="w-4 h-4 mr-2" />
                     プロジェクト構造
                   </TabsTrigger>
-                  <TabsTrigger value="code" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
+                  <TabsTrigger value="code" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:shadow-sm transition-all">
                     <Code className="w-4 h-4 mr-2" />
                     コード
                   </TabsTrigger>
-                  <TabsTrigger value="settings" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900">
+                  <TabsTrigger value="settings" className="flex-1 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:shadow-sm transition-all">
                     <Settings className="w-4 h-4 mr-2" />
                     設定
                   </TabsTrigger>
@@ -47,13 +47,13 @@ const MainContent = () => {
               </div>
               
               <TabsContent value="preview" className="flex-1 mt-0 rounded-lg overflow-hidden">
-                <div className="h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+                <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm">
                   <PreviewSection />
                 </div>
               </TabsContent>
 
               <TabsContent value="structure" className="flex-1 mt-0">
-                <div className="h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm p-6">
                   {projectStructure && (
                     <FileExplorer 
                       structure={{
@@ -72,14 +72,14 @@ const MainContent = () => {
               </TabsContent>
 
               <TabsContent value="code" className="flex-1 mt-0">
-                <div className="h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm p-6">
                   <h3 className="text-lg font-semibold mb-4">コードエディタ</h3>
                   {/* コードエディタの実装 */}
                 </div>
               </TabsContent>
 
               <TabsContent value="settings" className="flex-1 mt-0">
-                <div className="h-full bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+                <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm p-6">
                   <h3 className="text-lg font-semibold mb-4">設定</h3>
                   {/* 設定の実装 */}
                 </div>
