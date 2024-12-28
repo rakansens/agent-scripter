@@ -22,6 +22,21 @@ const PreviewSection = () => {
     setSelectedFile(path);
   };
 
+  // プロジェクト構造が存在しない場合の表示
+  if (!projectStructure) {
+    return (
+      <div className="lg:col-span-1 space-y-4">
+        <Card className="p-4">
+          <CodeGenerationProgress
+            progress={generationProgress}
+            status="プロジェクト構造を生成中..."
+            steps={generationSteps}
+          />
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="lg:col-span-1 space-y-4">
       <div className="flex justify-end space-x-2">
