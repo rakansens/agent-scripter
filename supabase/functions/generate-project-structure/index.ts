@@ -8,6 +8,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // CORSプリフライトリクエストの処理
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -17,7 +18,20 @@ serve(async (req) => {
     console.log('Generating project structure for prompt:', prompt)
 
     const structure = generateProjectStructure(prompt);
-    const initialCode = structure.components[0].children[0].children[0].children[0].code;
+    
+    // 構造が正しく生成されているか確認
+    if (!structure || !structure.components || !Array.isArray(structure.components)) {
+      throw new Error('Invalid project structure generated');
+    }
+
+    // 初期コードの取得を安全に行う
+    let initialCode = null;
+    try {
+      initialCode = structure.components[0]?.children?.[0]?.children?.[0]?.children?.[0]?.code || null;
+    } catch (e) {
+      console.error('Error accessing initial code:', e);
+      initialCode = null;
+    }
 
     return new Response(
       JSON.stringify({ 
@@ -33,9 +47,12 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in generate-project-structure:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      }),
       { 
         status: 500, 
         headers: { 
