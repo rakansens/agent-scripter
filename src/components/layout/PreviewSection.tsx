@@ -10,16 +10,17 @@ import { FileViewer } from '@/components/file-viewer/FileViewer';
 import { useAgent } from '@/contexts/AgentContext';
 import GeneratedLandingPage from '@/components/preview/GeneratedLandingPage';
 import PreviewContainer from '@/components/preview/PreviewContainer';
+import { FileNode } from '@/components/file-explorer/FileExplorer';
 
 const PreviewSection = () => {
   const { generationSteps, projectStructure, generationProgress } = useAgent();
-  const [selectedFile, setSelectedFile] = React.useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = React.useState<FileNode | null>(null);
   const [currentGeneratedCode, setCurrentGeneratedCode] = React.useState<string>('');
   const [showPreview, setShowPreview] = useState(false);
 
-  const handleFileSelect = (path: string) => {
-    console.log('Selected file:', path);
-    setSelectedFile(path);
+  const handleFileSelect = (file: FileNode) => {
+    console.log('Selected file:', file);
+    setSelectedFile(file);
   };
 
   // プロジェクト構造が存在しない場合の表示
@@ -84,7 +85,7 @@ const PreviewSection = () => {
             currentCode={currentGeneratedCode}
           />
 
-          {projectStructure && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="p-4">
               <ScrollArea className="h-[400px]">
                 <ProjectStructureView
@@ -93,11 +94,11 @@ const PreviewSection = () => {
                 />
               </ScrollArea>
             </Card>
-          )}
 
-          {selectedFile && (
-            <FileViewer filePath={selectedFile} />
-          )}
+            {selectedFile && (
+              <FileViewer file={selectedFile} />
+            )}
+          </div>
         </>
       )}
     </div>

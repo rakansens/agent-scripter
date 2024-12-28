@@ -1,20 +1,23 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import CodeEditor from '@/components/chat/CodeEditor';
+import { FileNode } from '@/components/file-explorer/FileExplorer';
 
 interface FileViewerProps {
-  filePath: string;
+  file: FileNode | null;
 }
 
-export const FileViewer: React.FC<FileViewerProps> = ({ filePath }) => {
-  // In a real application, we would fetch the file content here
-  // For now, we'll display a placeholder
+export const FileViewer: React.FC<FileViewerProps> = ({ file }) => {
+  if (!file) {
+    return null;
+  }
+
   return (
     <Card className="p-4">
-      <h3 className="text-lg font-semibold mb-2">{filePath}</h3>
+      <h3 className="text-lg font-semibold mb-2">{file.name}</h3>
       <CodeEditor
-        code={`// Content of ${filePath}`}
-        language="typescript"
+        code={file.content || `// Content of ${file.name}`}
+        language={file.language || 'typescript'}
         readOnly
       />
     </Card>
