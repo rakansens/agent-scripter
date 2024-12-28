@@ -9,19 +9,32 @@ import { Eye, FolderTree, Code, Settings } from 'lucide-react';
 import FileExplorer from '../file-explorer/FileExplorer';
 import { useAgent } from '@/contexts/AgentContext';
 import { cn } from '@/lib/utils';
+import DirectoryTree from '../file-explorer/DirectoryTree';
 
 const MainContent = () => {
   const { projectStructure } = useAgent();
 
+  const treeStructure = projectStructure ? {
+    name: projectStructure.name,
+    type: 'directory',
+    children: projectStructure.components.map(comp => ({
+      name: comp.name,
+      type: comp.type === 'directory' ? 'directory' : 'file',
+      children: comp.children?.map(child => ({
+        name: child.name,
+        type: child.type === 'directory' ? 'directory' : 'file',
+        children: child.children
+      }))
+    }))
+  } : null;
+
   return (
     <Layout>
       <div className="fixed inset-0 flex overflow-hidden">
-        {/* チャットセクション */}
         <div className="w-[450px] flex flex-col bg-white/90 dark:bg-gray-900/90 border-r border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm">
           <ChatSection />
         </div>
 
-        {/* タブ付きコンテンツエリア */}
         <div className="flex-1 overflow-auto">
           <div className="h-full p-4">
             <Tabs defaultValue="preview" className="h-full flex flex-col">
@@ -54,10 +67,22 @@ const MainContent = () => {
 
               <TabsContent value="structure" className="flex-1 mt-0">
                 <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm p-6">
+                  {treeStructure ? (
+                    <DirectoryTree structure={treeStructure} />
+                  ) : (
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                      プロジェクト構造がまだ生成されていません
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="code" className="flex-1 mt-0">
+                <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm p-6">
                   {projectStructure && (
                     <FileExplorer 
                       structure={{
-                        ...projectStructure,
+                        name: projectStructure.name,
                         type: 'directory',
                         children: projectStructure.components.map(comp => ({
                           name: comp.name,
@@ -71,17 +96,9 @@ const MainContent = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="code" className="flex-1 mt-0">
-                <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm p-6">
-                  <h3 className="text-lg font-semibold mb-4">コードエディタ</h3>
-                  {/* コードエディタの実装 */}
-                </div>
-              </TabsContent>
-
               <TabsContent value="settings" className="flex-1 mt-0">
                 <div className="h-full bg-white/80 dark:bg-gray-900/80 rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm p-6">
-                  <h3 className="text-lg font-semibold mb-4">設定</h3>
-                  {/* 設定の実装 */}
+                  <h3 className="text-lg font-semibold mb-4 text-white">設定</h3>
                 </div>
               </TabsContent>
             </Tabs>
