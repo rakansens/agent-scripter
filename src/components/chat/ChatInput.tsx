@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { SendHorizontal } from "lucide-react";
 
 interface ChatInputProps {
@@ -18,31 +18,16 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (message.trim()) {
-        handleSubmit(e);
-      }
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <Textarea
+    <form onSubmit={handleSubmit} className="flex space-x-2">
+      <Input
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
         placeholder="メッセージを入力..."
-        className="min-h-[60px] max-h-[200px] pr-12 resize-none bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800"
+        className="flex-1 bg-gray-700 border-gray-600 text-white"
       />
-      <Button
-        type="submit"
-        size="icon"
-        disabled={!message.trim()}
-        className="absolute right-2 bottom-2"
-      >
-        <SendHorizontal className="h-4 w-4" />
+      <Button type="submit" disabled={!message.trim()}>
+        <SendHorizontal className="h-5 w-5" />
       </Button>
     </form>
   );

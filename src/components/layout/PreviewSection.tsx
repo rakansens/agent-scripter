@@ -8,7 +8,6 @@ import { FileViewer } from '@/components/file-viewer/FileViewer';
 import { useAgent } from '@/contexts/AgentContext';
 import GeneratedLandingPage from '@/components/preview/GeneratedLandingPage';
 import PreviewContainer from '@/components/preview/PreviewContainer';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const PreviewSection = () => {
   const { generationSteps, projectStructure, generationProgress } = useAgent();
@@ -16,67 +15,49 @@ const PreviewSection = () => {
   const [currentGeneratedCode, setCurrentGeneratedCode] = React.useState<string>('');
 
   const handleFileSelect = (path: string) => {
+    console.log('Selected file:', path);
     setSelectedFile(path);
   };
 
   return (
-    <div className="space-y-4 h-full overflow-auto">
+    <div className="lg:col-span-1 space-y-4">
       <PreviewContainer>
         <GeneratedLandingPage />
       </PreviewContainer>
 
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="progress">
-          <AccordionTrigger>生成の進捗</AccordionTrigger>
-          <AccordionContent>
-            <Card className="p-4">
-              <CodeGenerationProgress
-                progress={generationProgress}
-                status={
-                  generationProgress === 100
-                    ? "生成完了"
-                    : generationProgress > 0
-                    ? "生成中..."
-                    : "待機中"
-                }
-                steps={generationSteps}
-                tech={["React", "TypeScript", "Tailwind CSS"]}
-              />
-            </Card>
-          </AccordionContent>
-        </AccordionItem>
+      <Card className="p-4">
+        <CodeGenerationProgress
+          progress={generationProgress}
+          status={
+            generationProgress === 100
+              ? "生成完了"
+              : generationProgress > 0
+              ? "生成中..."
+              : "待機中"
+          }
+          steps={generationSteps}
+          tech={["React", "TypeScript", "Tailwind CSS"]}
+        />
+      </Card>
+      
+      <CodeGenerationVisualizer 
+        steps={generationSteps}
+        currentCode={currentGeneratedCode}
+      />
 
-        {projectStructure && (
-          <AccordionItem value="structure">
-            <AccordionTrigger>プロジェクト構造</AccordionTrigger>
-            <AccordionContent>
-              <Card className="p-4">
-                <ScrollArea className="h-[300px]">
-                  <ProjectStructureView
-                    structure={projectStructure}
-                    onSelect={handleFileSelect}
-                  />
-                </ScrollArea>
-              </Card>
-            </AccordionContent>
-          </AccordionItem>
-        )}
-
-        <AccordionItem value="code">
-          <AccordionTrigger>生成されたコード</AccordionTrigger>
-          <AccordionContent>
-            <CodeGenerationVisualizer 
-              steps={generationSteps}
-              currentCode={currentGeneratedCode}
+      {projectStructure && (
+        <Card className="p-4">
+          <ScrollArea className="h-[400px]">
+            <ProjectStructureView
+              structure={projectStructure}
+              onSelect={handleFileSelect}
             />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          </ScrollArea>
+        </Card>
+      )}
 
       {selectedFile && (
-        <Card className="p-4">
-          <FileViewer filePath={selectedFile} />
-        </Card>
+        <FileViewer filePath={selectedFile} />
       )}
     </div>
   );
