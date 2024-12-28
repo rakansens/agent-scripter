@@ -1,62 +1,75 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAgent } from '@/contexts/AgentContext';
+import { Card } from '@/components/ui/card';
 
 const GeneratedLandingPage = () => {
   const { projectStructure } = useAgent();
+  const [sections, setSections] = useState<React.ReactNode[]>([]);
 
-  if (!projectStructure) {
+  useEffect(() => {
+    if (!projectStructure) return;
+
+    const sectionsDir = projectStructure.components[0]?.children?.[0]?.children?.find(
+      dir => dir.name === 'sections'
+    );
+
+    if (!sectionsDir?.children) return;
+
+    const loadedSections = sectionsDir.children.map(section => {
+      if (!section.code) return null;
+
+      try {
+        // コードを安全に評価するための関数
+        const evalComponent = new Function(
+          'React',
+          'Button',
+          'Card',
+          'Rocket',
+          'Shield',
+          'Zap',
+          `
+          const exports = {};
+          ${section.code}
+          return exports.default;
+        `
+        );
+
+        // 必要な依存関係をインポート
+        const Button = () => <button className="px-4 py-2 bg-primary text-white rounded">Button</button>;
+        const icons = {
+          Rocket: () => <span>🚀</span>,
+          Shield: () => <span>🛡️</span>,
+          Zap: () => <span>⚡</span>
+        };
+
+        const Component = evalComponent(
+          React,
+          Button,
+          Card,
+          icons.Rocket,
+          icons.Shield,
+          icons.Zap
+        );
+
+        return <Component key={section.name} />;
+      } catch (error) {
+        console.error(`Error rendering section ${section.name}:`, error);
+        return null;
+      }
+    });
+
+    setSections(loadedSections.filter(Boolean));
+  }, [projectStructure]);
+
+  if (!sections.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">プレビューを生成中...</p>
-      </div>
+      <Card className="p-4">
+        <p className="text-center text-gray-500">プレビューを生成中...</p>
+      </Card>
     );
   }
 
-  // プロジェクト構造から実際のコンポーネントを生成
-  const generateComponent = (code: string) => {
-    try {
-      // 安全なコード実行のため、evalを使用せず、
-      // 将来的にはより安全な方法（例：sandboxed iframe）を実装することを推奨
-      return (
-        <div className="p-4 bg-gray-100 rounded-lg">
-          <p className="text-sm text-gray-500">
-            注: プレビューは開発中です。現在は静的なHTMLとして表示されています。
-          </p>
-          <div 
-            className="mt-4"
-            dangerouslySetInnerHTML={{ 
-              __html: code
-                .replace(/class=/g, 'className=')
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-            }} 
-          />
-        </div>
-      );
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      return (
-        <div className="p-4 bg-red-100 text-red-600 rounded-lg">
-          プレビューの生成中にエラーが発生しました。
-        </div>
-      );
-    }
-  };
-
-  // メインコンポーネントを探す（例：App.tsxやindex.tsx）
-  const mainComponent = projectStructure.components.find(
-    comp => comp.name.toLowerCase().includes('app') || 
-           comp.name.toLowerCase().includes('index')
-  );
-
-  if (!mainComponent || !mainComponent.code) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">メインコンポーネントが見つかりません。</p>
-      </div>
-    );
-  }
-
-  return generateComponent(mainComponent.code);
+  return <div className="space-y-8">{sections}</div>;
 };
 
 export default GeneratedLandingPage;
