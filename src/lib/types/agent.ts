@@ -2,7 +2,9 @@ export type AgentRole =
   | "architect" 
   | "component-generator" 
   | "styling" 
-  | "testing";
+  | "testing"
+  | "content"
+  | "performance";
 
 export interface Agent {
   role: AgentRole;

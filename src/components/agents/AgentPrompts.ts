@@ -7,7 +7,7 @@ export const AGENT_PROMPTS = {
 - メンテナンス性
 - パフォーマンス
 `,
-  componentGenerator: `
+  "component-generator": `
 以下の基準に従ってReactコンポーネントを生成してください：
 - TypeScriptの型安全性
 - アクセシビリティ対応
