@@ -1,56 +1,17 @@
-import { ProjectStructure } from './types.ts';
-import { generateLayoutComponents, generateUIComponents, generateLandingPageComponents } from './components.ts';
+import { ProjectStructure } from './types';
+import { generateComponents } from './components';
 
 export const generateProjectStructure = (prompt: string): ProjectStructure => {
   return {
-    name: "Generated React Project",
+    name: "AI-Powered Project",
     description: prompt,
-    components: [
-      {
-        name: "src",
-        type: "directory",
-        path: "/src",
-        description: "Source code directory",
-        children: [
-          {
-            name: "components",
-            type: "directory",
-            path: "/src/components",
-            description: "Reusable components",
-            children: [
-              {
-                name: "layout",
-                type: "directory",
-                path: "/src/components/layout",
-                description: "Layout components",
-                children: generateLayoutComponents()
-              },
-              {
-                name: "ui",
-                type: "directory",
-                path: "/src/components/ui",
-                description: "UI components",
-                children: generateUIComponents()
-              },
-              {
-                name: "sections",
-                type: "directory",
-                path: "/src/components/sections",
-                description: "Landing page sections",
-                children: generateLandingPageComponents(prompt)
-              }
-            ]
-          }
-        ]
-      }
-    ],
+    components: generateComponents(prompt),
     dependencies: [
       "react",
       "react-dom",
-      "react-router-dom",
       "typescript",
       "tailwindcss",
-      "@tanstack/react-query",
+      "@google/generative-ai",
       "lucide-react",
       "clsx",
       "class-variance-authority"
