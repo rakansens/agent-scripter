@@ -14,18 +14,16 @@ import DirectoryTree, { TreeNode } from '../file-explorer/DirectoryTree';
 const MainContent = () => {
   const { projectStructure } = useAgent();
 
+  const mapToTreeNode = (comp: any): TreeNode => ({
+    name: comp.name,
+    type: comp.type === 'directory' ? 'directory' as const : 'file' as const,
+    children: comp.children?.map(mapToTreeNode)
+  });
+
   const treeStructure: TreeNode | null = projectStructure ? {
     name: projectStructure.name,
     type: 'directory' as const,
-    children: projectStructure.components.map(comp => ({
-      name: comp.name,
-      type: comp.type === 'directory' ? 'directory' as const : 'file' as const,
-      children: comp.children?.map(child => ({
-        name: child.name,
-        type: child.type === 'directory' ? 'directory' as const : 'file' as const,
-        children: child.children
-      }))
-    }))
+    children: projectStructure.components.map(mapToTreeNode)
   } : null;
 
   return (
