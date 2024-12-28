@@ -1,5 +1,5 @@
-import { ProjectStructure } from './types';
-import { generateComponents } from './components';
+import { ProjectStructure } from './types.ts';
+import { generateComponents } from './components.ts';
 
 export const generateProjectStructure = (prompt: string): ProjectStructure => {
   return {

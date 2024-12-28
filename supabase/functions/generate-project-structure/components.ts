@@ -1,7 +1,7 @@
-import { ComponentStructure } from './types';
-import { generateLayoutComponents } from './templates/layout';
-import { generateUIComponents } from './templates/ui';
-import { generateLandingPageComponents } from './templates/landing';
+import { ComponentStructure } from './types.ts';
+import { generateLayoutComponents } from './templates/layout.ts';
+import { generateUIComponents } from './templates/ui.ts';
+import { generateLandingPageComponents } from './templates/landing.ts';
 
 export const generateComponents = (prompt: string): ComponentStructure[] => {
   return [
