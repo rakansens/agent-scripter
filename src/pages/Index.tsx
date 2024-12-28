@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Agent, ProjectStructure, GenerationStep, ComponentStructure } from "@/lib/types/agent";
+import { Agent, ProjectStructure, GenerationStep } from "@/lib/types/agent";
 import { Message } from "@/lib/types";
 import { useToast } from "@/components/ui/use-toast";
 import AgentSystem from "@/components/agents/AgentSystem";
@@ -10,33 +10,13 @@ import CodeGenerationProgress from "@/components/chat/CodeGenerationProgress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ProjectStructureView from "@/components/project-structure/ProjectStructureView";
 import CodeGenerationVisualizer from "@/components/code-generation/CodeGenerationVisualizer";
+import { FileViewer } from "@/components/file-viewer/FileViewer";
 
-const INITIAL_AGENTS: Agent[] = [
-  {
-    role: "architect",
-    name: "Architect Agent",
-    description: "Designs the overall project structure and component hierarchy",
-    capabilities: ["Project planning", "Directory structure", "Dependency management"],
-  },
-  {
-    role: "component-generator",
-    name: "Component Generator",
-    description: "Generates React components and their implementations",
-    capabilities: ["React", "TypeScript", "Component patterns"],
-  },
-  {
-    role: "styling",
-    name: "Styling Agent",
-    description: "Handles component styling and visual design",
-    capabilities: ["TailwindCSS", "Responsive design", "Accessibility"],
-  },
-  {
-    role: "testing",
-    name: "Testing Agent",
-    description: "Creates test cases and ensures code quality",
-    capabilities: ["Unit testing", "Integration testing", "Test coverage"],
-  },
-];
+// Move types to a separate file to reduce complexity
+interface ComponentWithCode {
+  path: string;
+  content: string;
+}
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -46,7 +26,13 @@ const Index = () => {
   const [projectStructure, setProjectStructure] = useState<ProjectStructure | null>(null);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
   const [currentGeneratedCode, setCurrentGeneratedCode] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const handleFileSelect = (path: string) => {
+    console.log('Selected file:', path);
+    setSelectedFile(path);
+  };
 
   const handleSendMessage = async (content: string) => {
     const newMessage: Message = {
@@ -129,19 +115,12 @@ const Index = () => {
       if (!componentResponse.data) throw new Error("Component generation failed");
       console.log('Generated components:', componentResponse.data);
 
-      // Update the project structure with generated code
+      // Update project structure with generated code
       if (componentResponse.data.components) {
-        const updatedStructure = {
-          ...response.data.structure,
-          components: response.data.structure.components.map((component: ComponentStructure) => {
-            const generatedComponent = componentResponse.data.components.find(
-              (gc: any) => gc.path === component.path
-            );
-            return generatedComponent
-              ? { ...component, code: generatedComponent.content, language: 'typescript' }
-              : component;
-          }),
-        };
+        const updatedStructure = updateStructureWithGeneratedCode(
+          response.data.structure,
+          componentResponse.data.components
+        );
         setProjectStructure(updatedStructure);
       }
 
@@ -149,6 +128,15 @@ const Index = () => {
       setGenerationSteps((prev) =>
         prev.map((step) => ({ ...step, status: "completed" }))
       );
+
+      // Add system message with generated files
+      const systemMessage: Message = {
+        id: Date.now().toString(),
+        content: generateSystemMessage(componentResponse.data.components),
+        role: "assistant",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, systemMessage]);
 
       toast({
         title: "生成完了",
@@ -221,9 +209,14 @@ const Index = () => {
                 <ScrollArea className="h-[400px]">
                   <ProjectStructureView
                     structure={projectStructure}
+                    onSelect={handleFileSelect}
                   />
                 </ScrollArea>
               </Card>
+            )}
+
+            {selectedFile && (
+              <FileViewer filePath={selectedFile} />
             )}
           </div>
         </div>
@@ -231,5 +224,71 @@ const Index = () => {
     </div>
   );
 };
+
+// Helper functions moved to keep the main component cleaner
+const updateStructureWithGeneratedCode = (
+  structure: ProjectStructure,
+  generatedComponents: ComponentWithCode[]
+) => {
+  const updateComponent = (component: any) => {
+    if (component.type === 'component') {
+      const generatedComponent = generatedComponents.find(
+        gc => gc.path === component.path
+      );
+      if (generatedComponent) {
+        return {
+          ...component,
+          code: generatedComponent.content,
+          language: 'typescript'
+        };
+      }
+    }
+    if (component.children) {
+      return {
+        ...component,
+        children: component.children.map(updateComponent)
+      };
+    }
+    return component;
+  };
+
+  return {
+    ...structure,
+    components: structure.components.map(updateComponent)
+  };
+};
+
+const generateSystemMessage = (components: ComponentWithCode[]) => {
+  return `以下のファイルが生成されました：\n\n${components
+    .map(c => `- ${c.path}`)
+    .join('\n')}`;
+};
+
+const INITIAL_AGENTS: Agent[] = [
+  {
+    role: "architect",
+    name: "Architect Agent",
+    description: "Designs the overall project structure and component hierarchy",
+    capabilities: ["Project planning", "Directory structure", "Dependency management"],
+  },
+  {
+    role: "component-generator",
+    name: "Component Generator",
+    description: "Generates React components and their implementations",
+    capabilities: ["React", "TypeScript", "Component patterns"],
+  },
+  {
+    role: "styling",
+    name: "Styling Agent",
+    description: "Handles component styling and visual design",
+    capabilities: ["TailwindCSS", "Responsive design", "Accessibility"],
+  },
+  {
+    role: "testing",
+    name: "Testing Agent",
+    description: "Creates test cases and ensures code quality",
+    capabilities: ["Unit testing", "Integration testing", "Test coverage"],
+  },
+];
 
 export default Index;

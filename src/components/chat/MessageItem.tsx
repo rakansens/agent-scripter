@@ -15,6 +15,30 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
   const [selectedTab, setSelectedTab] = useState<'code' | 'preview'>('code');
 
   const renderContent = (content: string) => {
+    // First, check for generated files list
+    if (content.includes('以下のファイルが生成されました：')) {
+      const [intro, filesList] = content.split('\n\n');
+      return (
+        <>
+          <p className="text-sm mb-2">{intro}</p>
+          <div className="space-y-1">
+            {filesList.split('\n').map((line, index) => {
+              const filePath = line.replace('- ', '');
+              return (
+                <button
+                  key={index}
+                  onClick={() => console.log('Selected file:', filePath)}
+                  className="text-sm text-blue-500 hover:text-blue-600 block text-left"
+                >
+                  {filePath}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      );
+    }
+
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
     const parts = [];
     let lastIndex = 0;
