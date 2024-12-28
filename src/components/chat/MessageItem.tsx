@@ -15,12 +15,11 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
   const [selectedTab, setSelectedTab] = useState<'code' | 'preview'>('code');
 
   const renderContent = (content: string) => {
-    // First, check for generated files list
     if (content.includes('以下のファイルが生成されました：')) {
       const [intro, filesList] = content.split('\n\n');
       return (
         <>
-          <p className="text-sm mb-2 text-gray-700 dark:text-gray-200">{intro}</p>
+          <p className="text-sm mb-2 text-gray-100 dark:text-gray-100">{intro}</p>
           <div className="space-y-1">
             {filesList.split('\n').map((line, index) => {
               const filePath = line.replace('- ', '');
@@ -28,7 +27,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
                 <button
                   key={index}
                   onClick={() => console.log('Selected file:', filePath)}
-                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 block text-left transition-colors"
+                  className="text-sm text-blue-400 hover:text-blue-300 dark:text-blue-300 dark:hover:text-blue-200 block text-left transition-colors"
                 >
                   {filePath}
                 </button>
@@ -47,7 +46,7 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
     while ((match = codeBlockRegex.exec(content)) !== null) {
       if (match.index > lastIndex) {
         parts.push(
-          <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-200">
+          <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-100 dark:text-gray-100">
             {content.slice(lastIndex, match.index)}
           </p>
         );
@@ -63,8 +62,8 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
               className={cn(
                 "px-3 py-1 rounded-t-lg text-sm transition-colors",
                 selectedTab === 'code'
-                  ? "bg-gray-800 text-gray-100"
-                  : "bg-gray-700 text-gray-300 hover:bg-gray-800"
+                  ? "bg-gray-900 text-gray-100"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-900"
               )}
             >
               Code
@@ -74,14 +73,14 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
               className={cn(
                 "px-3 py-1 rounded-t-lg text-sm transition-colors",
                 selectedTab === 'preview'
-                  ? "bg-gray-800 text-gray-100"
-                  : "bg-gray-700 text-gray-300 hover:bg-gray-800"
+                  ? "bg-gray-900 text-gray-100"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-900"
               )}
             >
               Preview
             </button>
           </div>
-          <div className="border border-gray-700 rounded-lg overflow-hidden bg-gray-900">
+          <div className="border border-gray-800 rounded-lg overflow-hidden bg-gray-950">
             {selectedTab === 'code' ? (
               isTyping ? (
                 <TypingCodeBlock code={code} language={language} />
@@ -100,13 +99,13 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
 
     if (lastIndex < content.length) {
       parts.push(
-        <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-200">
+        <p key={`text-${lastIndex}`} className="text-sm whitespace-pre-wrap text-gray-100 dark:text-gray-100">
           {content.slice(lastIndex)}
         </p>
       );
     }
 
-    return parts.length > 0 ? parts : <p className="text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-200">{content}</p>;
+    return parts.length > 0 ? parts : <p className="text-sm whitespace-pre-wrap text-gray-100 dark:text-gray-100">{content}</p>;
   };
 
   return (
@@ -118,10 +117,10 @@ const MessageItem = ({ message, isTyping = false }: MessageItemProps) => {
     >
       <div
         className={cn(
-          "max-w-[80%] rounded-lg px-6 py-4 shadow-sm",
+          "max-w-[80%] rounded-lg px-6 py-4 shadow-md",
           isUser
             ? "bg-primary text-primary-foreground"
-            : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+            : "bg-gray-800 dark:bg-gray-900 text-gray-100"
         )}
       >
         {renderContent(message.content)}
