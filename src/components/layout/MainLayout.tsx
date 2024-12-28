@@ -9,20 +9,20 @@ import { Eye, FolderTree, Code, Settings } from 'lucide-react';
 import FileExplorer from '../file-explorer/FileExplorer';
 import { useAgent } from '@/contexts/AgentContext';
 import { cn } from '@/lib/utils';
-import DirectoryTree from '../file-explorer/DirectoryTree';
+import DirectoryTree, { TreeNode } from '../file-explorer/DirectoryTree';
 
 const MainContent = () => {
   const { projectStructure } = useAgent();
 
-  const treeStructure = projectStructure ? {
+  const treeStructure: TreeNode | null = projectStructure ? {
     name: projectStructure.name,
-    type: 'directory',
+    type: 'directory' as const,
     children: projectStructure.components.map(comp => ({
       name: comp.name,
-      type: comp.type === 'directory' ? 'directory' : 'file',
+      type: comp.type === 'directory' ? 'directory' as const : 'file' as const,
       children: comp.children?.map(child => ({
         name: child.name,
-        type: child.type === 'directory' ? 'directory' : 'file',
+        type: child.type === 'directory' ? 'directory' as const : 'file' as const,
         children: child.children
       }))
     }))
