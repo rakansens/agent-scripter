@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ChatContainer from '@/components/chat/ChatContainer';
 import { useMessage } from '@/contexts/MessageContext';
 import { useAgent } from '@/contexts/AgentContext';
@@ -7,11 +7,24 @@ import { useToast } from '@/components/ui/use-toast';
 import { Message } from '@/lib/types';
 import { GenerationStep, AgentRole, GenerationStepStatus } from '@/lib/types/agent';
 import { INITIAL_AGENTS } from '@/lib/constants/agents';
+import type { TreeNode } from '../file-explorer/DirectoryTree';
 
 const ChatSection = () => {
   const { messages, isTyping, currentStreamedMessage, setMessages, setIsTyping, setCurrentStreamedMessage } = useMessage();
   const { setGenerationSteps, setProjectStructure, setGenerationProgress } = useAgent();
+  const [directoryStructure, setDirectoryStructure] = useState<TreeNode | null>(null);
   const { toast } = useToast();
+
+  const updateDirectoryStructure = (structure: any) => {
+    const convertToTreeNode = (node: any): TreeNode => ({
+      name: node.name,
+      type: node.type === 'directory' ? 'directory' : 'file',
+      status: 'creating',
+      children: node.children?.map(convertToTreeNode)
+    });
+
+    setDirectoryStructure(convertToTreeNode(structure));
+  };
 
   const handleSendMessage = async (content: string) => {
     const newMessage: Message = {
@@ -25,9 +38,9 @@ const ChatSection = () => {
     setIsTyping(true);
     setCurrentStreamedMessage("");
     setGenerationProgress(0);
+    setDirectoryStructure(null);
 
     try {
-      // Initialize generation steps with all agents
       const initialSteps: GenerationStep[] = INITIAL_AGENTS.map((agent, index) => ({
         id: String(index + 1),
         name: agent.name,
@@ -39,14 +52,13 @@ const ChatSection = () => {
       
       setGenerationSteps(initialSteps);
 
-      // Add a progress message to the chat
       const progressMessage: Message = {
         id: Date.now().toString(),
         content: "生成を開始します...",
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages((prev: Message[]): Message[] => [...prev, progressMessage]);
+      setMessages(prev => [...prev, progressMessage]);
 
       const response = await supabase.functions.invoke("generate-project-structure", {
         body: { prompt: content },
@@ -56,21 +68,20 @@ const ChatSection = () => {
       
       console.log('Generated project structure:', response.data.structure);
       setProjectStructure(response.data.structure);
+      updateDirectoryStructure(response.data.structure);
       setGenerationProgress(25);
       
-      // Add structure generation message
       const structureMessage: Message = {
         id: Date.now().toString(),
         content: `以下のファイルが生成されました：\n\n${response.data.structure.components.map(comp => `- ${comp.path}`).join('\n')}`,
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages((prev: Message[]): Message[] => [...prev, structureMessage]);
+      setMessages(prev => [...prev, structureMessage]);
 
-      // Update generation steps as each agent completes its task
       let progress = 25;
       for (let i = 1; i < initialSteps.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate agent processing
+        await new Promise(resolve => setTimeout(resolve, 1000));
         progress += Math.floor(75 / (initialSteps.length - 1));
         setGenerationProgress(progress);
         
@@ -83,17 +94,24 @@ const ChatSection = () => {
         }));
         setGenerationSteps(updatedSteps);
 
-        // Add progress update message
+        if (directoryStructure) {
+          const updateNodeStatus = (node: TreeNode): TreeNode => ({
+            ...node,
+            status: 'completed',
+            children: node.children?.map(updateNodeStatus)
+          });
+          setDirectoryStructure(updateNodeStatus(directoryStructure));
+        }
+
         const stepMessage: Message = {
           id: Date.now().toString(),
           content: `${updatedSteps[i].name}の処理を実行中...\n進捗: ${progress}%`,
           role: "assistant",
           timestamp: new Date(),
         };
-        setMessages((prev: Message[]): Message[] => [...prev, stepMessage]);
+        setMessages(prev => [...prev, stepMessage]);
       }
 
-      // Set all steps to completed
       const completedSteps = initialSteps.map(step => ({
         ...step,
         status: "completed" as GenerationStepStatus,
@@ -101,14 +119,13 @@ const ChatSection = () => {
       }));
       setGenerationSteps(completedSteps);
 
-      // Add completion message
       const completionMessage: Message = {
         id: Date.now().toString(),
         content: "生成が完了しました！",
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages((prev: Message[]): Message[] => [...prev, completionMessage]);
+      setMessages(prev => [...prev, completionMessage]);
 
       setGenerationProgress(100);
       toast({
@@ -119,14 +136,13 @@ const ChatSection = () => {
     } catch (error) {
       console.error("Error in project generation:", error);
       
-      // Add error message to chat
       const errorMessage: Message = {
         id: Date.now().toString(),
         content: "エラーが発生しました。もう一度お試しください。",
         role: "assistant",
         timestamp: new Date(),
       };
-      setMessages((prev: Message[]): Message[] => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorMessage]);
 
       toast({
         variant: "destructive",
