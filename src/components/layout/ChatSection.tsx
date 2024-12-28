@@ -1,18 +1,12 @@
 import React from 'react';
 import ChatContainer from '@/components/chat/ChatContainer';
+import { useChat } from '@/hooks/useChat';
 import { useMessage } from '@/contexts/MessageContext';
 import { useCodeGeneration } from '@/hooks/useCodeGeneration';
-import { Message } from '@/lib/types';
 
 const ChatSection = () => {
-  const { 
-    messages, 
-    isTyping, 
-    currentStreamedMessage, 
-    setMessages, 
-    setIsTyping, 
-    setCurrentStreamedMessage 
-  } = useMessage();
+  const { messages, isLoading, sendMessage } = useChat();
+  const { setIsTyping, setCurrentStreamedMessage } = useMessage();
   
   const {
     generationProgress,
@@ -22,52 +16,19 @@ const ChatSection = () => {
   } = useCodeGeneration();
 
   const handleSendMessage = async (content: string) => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content,
-      role: "user",
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, newMessage]);
     setIsTyping(true);
     setCurrentStreamedMessage("");
 
     try {
-      const progressMessage: Message = {
-        id: Date.now().toString(),
-        content: "生成を開始します...",
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, progressMessage]);
-
-      const result = await generateCode(content);
-      
-      const structureMessage: Message = {
-        id: Date.now().toString(),
-        content: `以下のファイルが生成されました：\n\n${result.structure.components.map(comp => `- ${comp.path}`).join('\n')}`,
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, structureMessage]);
-
-      const completionMessage: Message = {
-        id: Date.now().toString(),
-        content: "生成が完了しました！",
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, completionMessage]);
-
+      if (content.includes('generate') || content.includes('create')) {
+        // コード生成のリクエストの場合
+        await generateCode(content);
+      } else {
+        // 通常のチャットの場合
+        await sendMessage(content);
+      }
     } catch (error) {
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        content: "エラーが発生しました。もう一度お試しください。",
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      console.error('Error in handleSendMessage:', error);
     } finally {
       setIsTyping(false);
       setCurrentStreamedMessage("");
@@ -78,9 +39,9 @@ const ChatSection = () => {
     <div className="mt-8">
       <ChatContainer
         messages={messages}
-        isTyping={isTyping}
+        isTyping={isLoading}
         onSendMessage={handleSendMessage}
-        streamedMessage={currentStreamedMessage}
+        streamedMessage=""
       />
     </div>
   );
