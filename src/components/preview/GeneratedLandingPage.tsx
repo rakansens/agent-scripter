@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useComponentGeneration } from '@/contexts/ComponentGenerationContext';
 import { useToast } from '@/components/ui/use-toast';
+import PreviewContainer from './PreviewContainer';
 
 const GeneratedLandingPage = () => {
   const { generatedComponents, isGenerating } = useComponentGeneration();
@@ -35,15 +36,17 @@ const GeneratedLandingPage = () => {
   }
 
   return (
-    <div className="min-h-screen">
-      {generatedComponents.map((component, index) => (
-        <div 
-          key={index}
-          className="p-4 border-b border-gray-200 animate-fade-in"
-          dangerouslySetInnerHTML={{ __html: component }}
-        />
-      ))}
-    </div>
+    <PreviewContainer>
+      <div className="min-h-screen">
+        {generatedComponents.map((component, index) => (
+          <div 
+            key={index}
+            className="animate-fade-in"
+            dangerouslySetInnerHTML={{ __html: component }}
+          />
+        ))}
+      </div>
+    </PreviewContainer>
   );
 };
 

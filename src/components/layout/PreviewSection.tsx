@@ -8,9 +8,9 @@ import CodeGenerationVisualizer from '@/components/code-generation/CodeGeneratio
 import ProjectStructureView from '@/components/project-structure/ProjectStructureView';
 import { FileViewer } from '@/components/file-viewer/FileViewer';
 import { useAgent } from '@/contexts/AgentContext';
-import CodePreview from '@/components/chat/CodePreview';
 import { FileNode } from '@/components/file-explorer/FileExplorer';
 import { useToast } from '@/components/ui/use-toast';
+import GeneratedLandingPage from '@/components/preview/GeneratedLandingPage';
 
 const PreviewSection = () => {
   const { generationSteps, projectStructure, generationProgress } = useAgent();
@@ -23,21 +23,13 @@ const PreviewSection = () => {
     setSelectedFile(file);
     if (file.content) {
       setCurrentGeneratedCode(file.content);
-      console.log('Selected file content:', file.content); // デバッグ用
+      console.log('Selected file content:', file.content);
     }
   };
 
   const togglePreview = () => {
-    if (!selectedFile?.content && !showPreview) {
-      toast({
-        title: "プレビューできません",
-        description: "プレビューするファイルを選択してください。",
-        variant: "destructive",
-      });
-      return;
-    }
     setShowPreview(!showPreview);
-    console.log('Preview toggled:', !showPreview); // デバッグ用
+    console.log('Preview toggled:', !showPreview);
   };
 
   if (!projectStructure) {
@@ -75,9 +67,9 @@ const PreviewSection = () => {
         </Button>
       </div>
 
-      {showPreview && selectedFile?.content ? (
+      {showPreview ? (
         <Card className="p-4">
-          <CodePreview code={selectedFile.content} />
+          <GeneratedLandingPage />
         </Card>
       ) : (
         <>
