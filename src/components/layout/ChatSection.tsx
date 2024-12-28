@@ -48,9 +48,21 @@ const ChatSection = () => {
       setProjectStructure(response.data.structure);
       setGenerationProgress(25);
 
-      const filesList = response.data.structure.components
-        .map(comp => `- ${comp.name}`)
-        .join('\n');
+      // 生成されたファイルの一覧を作成
+      const allFiles = [];
+      const processComponent = (component: any, path = '') => {
+        const currentPath = `${path}/${component.name}`;
+        if (component.type === 'file' || component.type === 'component') {
+          allFiles.push(currentPath);
+        }
+        if (component.children) {
+          component.children.forEach((child: any) => processComponent(child, currentPath));
+        }
+      };
+
+      response.data.structure.components.forEach((comp: any) => processComponent(comp));
+
+      const filesList = allFiles.map(file => `- ${file}`).join('\n');
 
       const filesMessage: Message = {
         id: Date.now().toString(),
