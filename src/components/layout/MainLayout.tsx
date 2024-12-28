@@ -4,19 +4,22 @@ import ChatSection from './ChatSection';
 import PreviewSection from './PreviewSection';
 import AgentSection from './AgentSection';
 import { AgentProvider } from '@/contexts/AgentContext';
+import { MessageProvider } from '@/contexts/MessageContext';
 
 const MainLayout = () => {
   return (
     <AgentProvider>
-      <Layout>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <AgentSection />
-            <ChatSection />
+      <MessageProvider>
+        <Layout>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <AgentSection />
+              <ChatSection />
+            </div>
+            <PreviewSection />
           </div>
-          <PreviewSection />
-        </div>
-      </Layout>
+        </Layout>
+      </MessageProvider>
     </AgentProvider>
   );
 };
