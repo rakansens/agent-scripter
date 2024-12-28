@@ -3,7 +3,7 @@ import Layout from './Layout';
 import ChatSection from './ChatSection';
 import PreviewSection from './PreviewSection';
 import { AgentProvider } from '@/contexts/AgentContext';
-import { MessageProvider } from '@/contexts/MessageProvider';
+import { MessageProvider } from '@/contexts/MessageContext';
 import Hero from '../sections/Hero';
 import Features from '../sections/Features';
 
