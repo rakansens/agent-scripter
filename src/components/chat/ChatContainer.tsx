@@ -1,6 +1,7 @@
 import { Message } from "@/lib/types";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
+import { Card } from "@/components/ui/card";
 
 interface ChatContainerProps {
   messages: Message[];
@@ -11,18 +12,23 @@ interface ChatContainerProps {
 
 const ChatContainer = ({ messages, isTyping, onSendMessage, streamedMessage }: ChatContainerProps) => {
   return (
-    <div className="flex flex-col w-full max-w-4xl mx-auto p-4">
-      <div className="flex-1 overflow-hidden bg-gray-800 rounded-t-lg">
+    <Card className="flex flex-col h-full bg-white dark:bg-gray-900">
+      <div className="p-4 border-b dark:border-gray-800">
+        <h2 className="text-lg font-semibold">チャット</h2>
+      </div>
+      
+      <div className="flex-1 overflow-hidden">
         <MessageList 
           messages={messages} 
           isTyping={isTyping} 
           streamedMessage={streamedMessage}
         />
       </div>
-      <div className="bg-gray-800 rounded-b-lg p-4">
+      
+      <div className="p-4 border-t dark:border-gray-800">
         <ChatInput onSendMessage={onSendMessage} />
       </div>
-    </div>
+    </Card>
   );
 };
 
